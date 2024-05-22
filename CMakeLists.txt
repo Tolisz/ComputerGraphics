@@ -5,8 +5,17 @@ project(duck VERSION 0.1 LANGUAGES CXX)
 # external libraries
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 add_subdirectory(externals/glm)
+add_subdirectory(externals/glfw)
+add_subdirectory(externals/glad)
+# set(DUCK_LINK_LIBS  PUBLIC glm
+#                     PUBLIC glfw
+#                     PUBLIC glad)
 
-set(DUCK_LINK_LIBS PUBLIC glm)
+# executable
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+set(DUCK_EXECUTABLE_NAME duck)
 
-add_executable(duck source/main.cpp)
-target_link_libraries(duck ${DUCK_LINK_LIBS})
+add_executable(${DUCK_EXECUTABLE_NAME} source/main.cpp)
+target_link_libraries(${DUCK_EXECUTABLE_NAME} PUBLIC glm)
+target_link_libraries(${DUCK_EXECUTABLE_NAME} PUBLIC glfw)
+target_link_libraries(${DUCK_EXECUTABLE_NAME} PUBLIC glad)
