@@ -1,3 +1,4 @@
 
-# a build directory
+# directories
 build/
+.vscode/
