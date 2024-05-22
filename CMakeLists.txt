@@ -7,15 +7,16 @@ project(duck VERSION 0.1 LANGUAGES CXX)
 add_subdirectory(externals/glm)
 add_subdirectory(externals/glfw)
 add_subdirectory(externals/glad)
-# set(DUCK_LINK_LIBS  PUBLIC glm
-#                     PUBLIC glfw
-#                     PUBLIC glad)
+add_subdirectory(externals/imgui)
+set(DUCK_LINK_LIBS  PUBLIC glm
+                    PUBLIC glfw
+                    PUBLIC glad
+                    PUBLIC imgui)
 
 # executable
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 set(DUCK_EXECUTABLE_NAME duck)
 
 add_executable(${DUCK_EXECUTABLE_NAME} source/main.cpp)
-target_link_libraries(${DUCK_EXECUTABLE_NAME} PUBLIC glm)
-target_link_libraries(${DUCK_EXECUTABLE_NAME} PUBLIC glfw)
-target_link_libraries(${DUCK_EXECUTABLE_NAME} PUBLIC glad)
+target_link_libraries(${DUCK_EXECUTABLE_NAME} ${DUCK_LINK_LIBS})
+#target_include_directories(${DUCK_EXECUTABLE_NAME} ${DUCK_INCLUDE_DIRS})
