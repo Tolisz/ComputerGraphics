@@ -16,7 +16,7 @@ set(DUCK_LINK_LIBS  PUBLIC glm
 # executable
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 set(DUCK_EXECUTABLE_NAME duck)
+file(GLOB DUCK_SOURCE_FILES source/*.cpp)
 
-add_executable(${DUCK_EXECUTABLE_NAME} source/main.cpp)
+add_executable(${DUCK_EXECUTABLE_NAME} ${DUCK_SOURCE_FILES})
 target_link_libraries(${DUCK_EXECUTABLE_NAME} ${DUCK_LINK_LIBS})
-#target_include_directories(${DUCK_EXECUTABLE_NAME} ${DUCK_INCLUDE_DIRS})
