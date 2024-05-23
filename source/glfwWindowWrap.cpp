@@ -23,6 +23,9 @@ bool glfwWindowWrap::InitWindow(int width, int height, const char* title)
         return false;
     }
 
+    m_width = width;
+    m_height = height;
+
     glfwSetWindowUserPointer(m_window, this);
     return true;
 }

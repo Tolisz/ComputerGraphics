@@ -5,10 +5,18 @@
 class camera
 {
 
+    
+private:
     glm::vec3 m_worldPos;
     glm::vec3 m_front;
     glm::vec3 m_right;
     glm::vec3 m_up;
+    glm::vec3 m_viewCenter;
+
+public:
+    float m_nearPlane;
+    float m_farPlane;
+    float m_fov;
 
 public:
 
@@ -29,7 +37,8 @@ public:
     // *=*=*=*=*=*=*=*=*=*=
 
     glm::mat4 GetViewMatrix();
-    glm::mat4 GetProjectionMatrix();
+    glm::mat4 GetProjectionMatrix(float aspect);
 
-    
+    void UpdatePosition(float posDelta);  
+    void UpdateRotation(glm::vec3 rotDelta);
 };
