@@ -4,10 +4,6 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 
-#include <cmath>
-
-#include <iostream>
-
 duckWindow::duckWindow()
 {}
 
@@ -129,7 +125,19 @@ void duckWindow::MouseButton_RIGHT_Callback(GLFWwindow* window, int action, int 
 
 void duckWindow::MouseButton_LEFT_Callback(GLFWwindow* window, int action, int mods)
 {
+    duckWindow* win = GW(window);
 
+    if (win->GetState() == wState::DEFALUT && action == GLFW_PRESS) {
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+        win->m_mouse_prevPos.x = xpos;
+        win->m_mouse_prevPos.y = ypos;
+
+        win->SetState(wState::CAMERA_ROTATE);
+    }
+    else if (win->GetState() == wState::CAMERA_ROTATE && action == GLFW_RELEASE) {
+        win->SetState(wState::DEFALUT);
+    }
 }
 
 
@@ -147,9 +155,19 @@ void duckWindow::CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
     win->m_mouse_prevPos.x = xpos;
     win->m_mouse_prevPos.y = ypos;
 
-    if (win->GetState() == wState::CAMERA_MOVE) {
+    switch (win->GetState())
+    {
+    case wState::CAMERA_MOVE:
         win->m_camera.UpdatePosition(deltaY * win->m_deltaTime);
-    }    
+        break;
+    
+    case wState::CAMERA_ROTATE:
+        win->m_camera.UpdateRotation(-deltaX * win->m_deltaTime, deltaY * win->m_deltaTime);
+        break;
+        
+    default:
+        break;
+    }
 }
 
 duckWindow* duckWindow::GW(GLFWwindow* window)

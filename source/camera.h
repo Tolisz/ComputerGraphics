@@ -11,7 +11,8 @@ private:
     glm::vec3 m_front;
     glm::vec3 m_right;
     glm::vec3 m_up;
-    glm::vec3 m_viewCenter;
+    glm::vec3 m_target;
+    glm::vec3 m_worldUp;
 
 public:
     float m_nearPlane;
@@ -40,5 +41,5 @@ public:
     glm::mat4 GetProjectionMatrix(float aspect);
 
     void UpdatePosition(float posDelta);  
-    void UpdateRotation(glm::vec3 rotDelta);
+    void UpdateRotation(float rotX, float rotY);
 };
