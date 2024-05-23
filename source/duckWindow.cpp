@@ -21,11 +21,12 @@ void duckWindow::RunInit()
     m_sh_testCube.LinkProgram();
 
     glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+    glEnable(GL_DEPTH_TEST);
 }
 
 void duckWindow::RunRenderTick()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     float aspect = static_cast<float>(m_width)/m_height;
 
@@ -164,7 +165,7 @@ void duckWindow::CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
     case wState::CAMERA_ROTATE:
         win->m_camera.UpdateRotation(-deltaX * win->m_deltaTime, deltaY * win->m_deltaTime);
         break;
-        
+
     default:
         break;
     }
