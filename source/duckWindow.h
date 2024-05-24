@@ -4,6 +4,7 @@
 #include "camera.h"
 #include "cube.h"
 #include "shader.h"
+#include "texture.h"
 
 struct ImGuiSizeCallbackData;
 
@@ -25,7 +26,8 @@ private:
     glm::vec2 m_mouse_prevPos;
 
     cube m_testCube;
-    Shader m_sh_testCube;
+    shader m_sh_testCube;
+    texture m_textTexture;
 
 public:
     // *=*=*=*=*=*=*=*=*=*=

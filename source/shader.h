@@ -4,29 +4,33 @@
 #include <glm/mat4x4.hpp>
 #include <string>
 
-class Shader
+class shader
 {
-public: 
+private:
 
-    GLuint m_vertexID;
-    GLuint m_tessellationControlID;
-    GLuint m_tessellationEvaluationID;
-    GLuint m_geometryID;
-    GLuint m_fragmentID;
+    GLuint m_ID;
 
 public:
 
-    GLuint ID;
+    // *=*=*=*=*=*=*=*=*=*=
+    //   Object Creation
+    // *=*=*=*=*=*=*=*=*=*=
 
-public:
+    shader();
+    ~shader();
 
-    Shader();
+    shader(const shader&) = delete;
+    shader(shader&&) = delete;
+    shader& operator=(const shader&) = delete;
+    shader& operator=(const shader&&) = delete; 
 
-    void VertexShader(const std::string& vertexShaderPath);
-    void GeometryShader(const std::string& geometryShaderPath);
-    void FragmentShader(const std::string& fragmentShaderPath);
+    // *=*=*=*=*=*=*=*=*=*=*=*
+    //        Methods
+    // *=*=*=*=*=*=*=*=*=*=*=*    
 
-    void LinkProgram();
+    void Init();
+    void AttachShader(const std::string& path, GLenum type);
+    void Link();
     void Use();
 
     // *=*=*=*=*=*=*=*=*=*=*=*
@@ -42,6 +46,4 @@ public:
 private:
 
     std::string ReadShaderCode(const std::string& codeFilePath);
-
-    void checkCompileErrors(GLuint shader, std::string type, std::string file);
 };
