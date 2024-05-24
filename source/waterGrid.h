@@ -2,15 +2,17 @@
 
 #include <glad/glad.h>
 
+#include "shader.h"
+
 class waterGrid
 {
 private: 
 
-    int N;
-    float a;
-    float h;
-    float c;
-    float dt;
+    int m_N;
+    float m_a;
+    float m_h;
+    float m_c;
+    float m_dt;
 
 private: 
 
@@ -20,6 +22,8 @@ private:
     GLuint m_gl_EBO;
 
     GLsizei m_gl_triangleCount;
+
+    shader m_sh_waterSimulation;
 
 public:
 
@@ -41,11 +45,12 @@ public:
     // *=*=*=*=*=*=*=*=*=*=
 
     void InitGL();
+    
+    void SimulateWater();
     void Draw();
 
 private:
 
     void PopulateBuffers();
-
 };
 

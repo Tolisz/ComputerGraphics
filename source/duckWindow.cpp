@@ -53,11 +53,11 @@ void duckWindow::RunRenderTick()
 
     m_testCube.Draw();
 
+    m_obj_water.SimulateWater();
     m_sh_water.Use();
     m_sh_water.setM4fv("model", GL_FALSE, glm::mat4(1.0f));
     m_sh_water.setM4fv("view", GL_FALSE, m_camera.GetViewMatrix());
     m_sh_water.setM4fv("projection", GL_FALSE, m_camera.GetProjectionMatrix(aspect));
-
     m_obj_water.Draw();
 
     RenderGUI();
