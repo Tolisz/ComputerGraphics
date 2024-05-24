@@ -18,6 +18,7 @@ public:
     float m_nearPlane;
     float m_farPlane;
     float m_fov;
+    float m_cameraSpeed = 0.01f; 
 
 public:
 

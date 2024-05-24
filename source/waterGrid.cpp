@@ -52,7 +52,7 @@ void waterGrid::SimulateWater()
     m_sh_waterSimulation.Use();
     m_sh_waterSimulation.set1ui("N", m_N);
     glDispatchCompute(m_N, m_N, 1);
-    glMemoryBarrier(GL_ALL_BARRIER_BITS);
+    glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
 }
 
 void waterGrid::PopulateBuffers()

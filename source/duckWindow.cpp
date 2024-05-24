@@ -5,6 +5,7 @@
 #include <imgui_impl_opengl3.h>
 
 #include <iostream>
+#include <cmath>
 
 duckWindow::duckWindow()
 {
@@ -16,6 +17,13 @@ duckWindow::~duckWindow()
 
 void duckWindow::RunInit()
 {
+    // GUI 
+    // ======================
+    m_gui_FrameNumToSumCounter = 0;
+    m_gui_FrameNumRenderTimeCounter = 0.0f;
+    m_gui_FrameNumToSum = 100;
+    m_gui_AvarageFrameNumRenderTime = 0.0f;
+
     SetUpWindowsCallbacks();
     m_windowState = wState::DEFALUT;
 
@@ -42,6 +50,13 @@ void duckWindow::RunInit()
 
 void duckWindow::RunRenderTick()
 {
+    // Process FrameCallback
+    // =============================
+    void EveryFrameCallback();
+
+    // Render Scene
+    // =============================
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     float aspect = static_cast<float>(m_width)/m_height;
@@ -80,13 +95,63 @@ void duckWindow::RenderGUI()
 
     ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
     ImGui::SetNextWindowSizeConstraints(ImVec2(200.0f, -1), ImVec2(FLT_MAX, -1), &duckWindow::InfoWindowSizeCallback, (void*)this);
-    ImGui::Begin("Project: Duck", (bool*)1, flags);
-    // ImGui::ShowDemoWindow((bool*)1);
+    ImGui::Begin("Project: Duck", (bool*)0, flags);
+    GenGUI_AppStatistics();
+    ImGui::ShowDemoWindow();
     ImGui::End();
 
     // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void duckWindow::GenGUI_AppStatistics()
+{
+    if (m_gui_FrameNumToSumCounter >= m_gui_FrameNumToSum) {
+        m_gui_FrameNumToSumCounter = 0;
+        m_gui_AvarageFrameNumRenderTime = m_gui_FrameNumRenderTimeCounter / m_gui_FrameNumToSum;
+        m_gui_FrameNumRenderTimeCounter = 0.0f;
+        m_gui_FrameNumToSum = static_cast<int>(std::ceilf(0.5f / m_gui_AvarageFrameNumRenderTime));
+    }
+    else {
+        m_gui_FrameNumToSumCounter++;
+        m_gui_FrameNumRenderTimeCounter += m_deltaTime;
+    }
+
+    static bool fpsLimit = true;
+    bool prevFpsLimit = fpsLimit;
+
+    if(ImGui::CollapsingHeader("App Statistics"))
+    {
+        if (ImGui::BeginTable("split", 2))
+        {
+            ImGui::TableNextColumn(); 
+            ImGui::Text("FPS = %.2f", 1.0f / m_gui_AvarageFrameNumRenderTime);
+            ImGui::TableNextColumn(); 
+            ImGui::Checkbox("FPS limit", &fpsLimit);
+            if (ImGui::BeginItemTooltip())
+            {
+                ImGui::TextColored(ImVec4(0.231f, 0.820f, 0.0984f, 1.0f), "With the limit maximum FSP number is bounded by a screen refresh rate.");
+                ImGui::TextColored(ImVec4(0.231f, 0.820f, 0.0984f, 1.0f), "Without the limit maximum GPU and CPU generate as much FPS as it possible");
+                ImGui::EndTooltip();
+            }
+            ImGui::TableNextColumn(); 
+            ImGui::Text("MS = %.6f", m_gui_AvarageFrameNumRenderTime);
+
+            ImGui::EndTable();
+
+            if (prevFpsLimit != fpsLimit) {
+                if (fpsLimit) {
+                    glfwSwapInterval(1);
+                    m_gui_FrameNumToSumCounter = 1;
+                    m_gui_FrameNumToSum = 1;
+                } 
+                else {
+                    glfwSwapInterval(0);
+                } 
+            }
+        }
+    }
 }
 
 void duckWindow::InfoWindowSizeCallback(ImGuiSizeCallbackData* data)
@@ -109,11 +174,21 @@ void duckWindow::FramebufferSizeCallback(GLFWwindow* window, int width, int heig
 
     win->m_width = static_cast<float>(width);
     win->m_height = static_cast<float>(height);
+    
+    glViewport(0, 0, width, height);
 }
 
 void duckWindow::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
-    
+    // (1) GUI callback handling
+    // =========================
+    ImGuiIO& io = ImGui::GetIO();
+    io.AddMouseButtonEvent(button, action == GLFW_PRESS);
+    if (io.WantCaptureMouse)
+        return;
+
+    // (2) App callback handling
+    // =========================
     switch (button)
     {
     case GLFW_MOUSE_BUTTON_RIGHT:
@@ -165,11 +240,29 @@ void duckWindow::MouseButton_LEFT_Callback(GLFWwindow* window, int action, int m
 
 void duckWindow::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
+    // (1) GUI callback handling
+    // =========================
+    ImGuiIO& io = ImGui::GetIO();
+    io.AddMouseWheelEvent(xoffset, yoffset);
+    if (io.WantCaptureMouse)
+        return;
+
+    // (2) App callback handling
+    // =========================
 
 }
 
 void duckWindow::CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
 {
+    // (1) GUI callback handling
+    // =========================
+    ImGuiIO& io = ImGui::GetIO();
+    io.AddMousePosEvent(xpos, ypos);
+    if (io.WantCaptureMouse)
+        return;
+
+    // (2) App callback handling
+    // =========================
     duckWindow* win = GW(window);
 
     float deltaX = xpos - win->m_mouse_prevPos.x;
@@ -180,16 +273,21 @@ void duckWindow::CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
     switch (win->GetState())
     {
     case wState::CAMERA_MOVE:
-        win->m_camera.UpdatePosition(deltaY * win->m_deltaTime);
+        win->m_camera.UpdatePosition(deltaY * win->m_camera.m_cameraSpeed);
         break;
     
     case wState::CAMERA_ROTATE:
-        win->m_camera.UpdateRotation(-deltaX * win->m_deltaTime, deltaY * win->m_deltaTime);
+        win->m_camera.UpdateRotation(-deltaX * win->m_camera.m_cameraSpeed, deltaY * win->m_camera.m_cameraSpeed);
         break;
 
     default:
         break;
     }
+}
+
+void duckWindow::EveryFrameCallback()
+{
+
 }
 
 duckWindow* duckWindow::GW(GLFWwindow* window)

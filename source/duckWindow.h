@@ -33,6 +33,15 @@ private:
     waterGrid m_obj_water;
     shader m_sh_water;
 
+    // *=*=*=*=*=*=*=*=*=*=
+    //         GUI
+    // *=*=*=*=*=*=*=*=*=*=
+
+    int m_gui_FrameNumToSumCounter;
+    int m_gui_FrameNumToSum;
+    float m_gui_FrameNumRenderTimeCounter;
+    float m_gui_AvarageFrameNumRenderTime;
+
 public:
     // *=*=*=*=*=*=*=*=*=*=
     //   Object Creation
@@ -58,6 +67,7 @@ private:
 private: 
 
     void RenderGUI();
+    void GenGUI_AppStatistics();
     static void InfoWindowSizeCallback(ImGuiSizeCallbackData* data);
 
 private: 
@@ -69,6 +79,8 @@ private:
     static void MouseButton_LEFT_Callback(GLFWwindow* window, int action, int mods);
     static void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
     static void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
+    
+    void EveryFrameCallback();
     static duckWindow* GW(GLFWwindow* window);
 
 private: 
