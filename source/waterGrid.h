@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glad/glad.h>
+
 class waterGrid
 {
 private: 
@@ -12,7 +14,12 @@ private:
 
 private: 
 
-    
+    GLuint m_gl_VAO;
+    GLuint m_gl_StartHeightBuffer;
+    GLuint m_gl_EndHeightBuffer;
+    GLuint m_gl_EBO;
+
+    GLsizei m_gl_triangleCount;
 
 public:
 
@@ -29,11 +36,16 @@ public:
     waterGrid& operator=(const waterGrid&) = delete;
     waterGrid& operator=(waterGrid&&) = delete;
 
+    // *=*=*=*=*=*=*=*=*=*=
+    //      Methods
+    // *=*=*=*=*=*=*=*=*=*=
+
     void InitGL();
+    void Draw();
 
 private:
 
-    
+    void PopulateBuffers();
 
 };
 

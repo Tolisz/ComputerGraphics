@@ -20,14 +20,18 @@ void duckWindow::RunInit()
     m_windowState = wState::DEFALUT;
 
     m_testCube.Init();
-    //m_sh_testCube.VertexShader("shaders/test.vert");
-    //m_sh_testCube.FragmentShader("shaders/test.frag");
-    //m_sh_testCube.LinkProgram();
 
     m_sh_testCube.Init();
     m_sh_testCube.AttachShader("shaders/test.vert", GL_VERTEX_SHADER);
     m_sh_testCube.AttachShader("shaders/test.frag", GL_FRAGMENT_SHADER);
     m_sh_testCube.Link();
+
+    m_obj_water.InitGL();
+    
+    m_sh_water.Init();
+    m_sh_water.AttachShader("shaders/water.vert", GL_VERTEX_SHADER);
+    m_sh_water.AttachShader("shaders/water.frag", GL_FRAGMENT_SHADER);
+    m_sh_water.Link();
 
     m_textTexture = texture::CreateTexture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
 
@@ -43,13 +47,18 @@ void duckWindow::RunRenderTick()
     float aspect = static_cast<float>(m_width)/m_height;
 
     m_sh_testCube.Use();
-
     m_sh_testCube.setM4fv("model", GL_FALSE, glm::mat4(1.0f));
     m_sh_testCube.setM4fv("view", GL_FALSE, m_camera.GetViewMatrix());
     m_sh_testCube.setM4fv("projection", GL_FALSE, m_camera.GetProjectionMatrix(aspect));
 
     m_testCube.Draw();
 
+    m_sh_water.Use();
+    m_sh_water.setM4fv("model", GL_FALSE, glm::mat4(1.0f));
+    m_sh_water.setM4fv("view", GL_FALSE, m_camera.GetViewMatrix());
+    m_sh_water.setM4fv("projection", GL_FALSE, m_camera.GetProjectionMatrix(aspect));
+
+    m_obj_water.Draw();
 
     RenderGUI();
 }

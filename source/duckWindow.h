@@ -5,6 +5,7 @@
 #include "cube.h"
 #include "shader.h"
 #include "texture.h"
+#include "waterGrid.h"
 
 struct ImGuiSizeCallbackData;
 
@@ -28,6 +29,9 @@ private:
     cube m_testCube;
     shader m_sh_testCube;
     texture m_textTexture;
+
+    waterGrid m_obj_water;
+    shader m_sh_water;
 
 public:
     // *=*=*=*=*=*=*=*=*=*=

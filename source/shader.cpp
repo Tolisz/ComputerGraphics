@@ -10,7 +10,9 @@ shader::shader()
 {}
 
 shader::~shader()
-{}
+{
+    glDeleteProgram(m_ID);
+}
 
 std::string shader::ReadShaderCode(const std::string& codeFilePath)
 {
