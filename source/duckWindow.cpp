@@ -44,7 +44,7 @@ void duckWindow::RunInit()
     m_textTexture = texture::CreateTexture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
 
     m_testLight.InitGL();
-    m_testLight.m_position = glm::vec3(0.0f, 0.0f, 0.0f);
+    m_testLight.m_position = glm::vec3(1.0f, 0.0f, 0.0f);
     m_testLight.m_diffuseColor = glm::vec3(0.0f, 1.0f, 0.0f);
     m_testLight.m_specularColor = glm::vec3(1.0f, 0.0f, 0.0f);
 
@@ -53,8 +53,12 @@ void duckWindow::RunInit()
     m_sh_testLight.AttachShader("shaders/lightBillboard.frag", GL_FRAGMENT_SHADER);
     m_sh_testLight.Link();
 
-    glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
+    glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
+
+    glEnable(GL_BLEND);
+    glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 }
 
 void duckWindow::RunRenderTick()
@@ -67,7 +71,7 @@ void duckWindow::RunRenderTick()
     // =============================
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
+
     float aspect = static_cast<float>(m_width)/m_height;
 
     glm::mat4 view = m_camera.GetViewMatrix();

@@ -19,7 +19,7 @@ const float c_R2 = 0.85; /* Radius of the outer circle, where its saturation is 
 const float c_dR1 = 0.15; /* Radius delta of the inner circle. */
 const float c_dR2 = 0.10; /* Radius delta of the outer circle. */
 const float c_N = 14; /* Number of segments on which the billboard will be devided. Only even segments of the inner circle are drawn*/
-const float c_earlySat = 2.0f;  /* See genSegment function */
+const float c_earlySatA = 2.0f;  /* See genSegment function */
 // [END] PARAMETERS
 
 float genCircle(float R, float dR, float l)
@@ -32,7 +32,7 @@ float genCircle(float R, float dR, float l)
 
 float genSegment(float A, float dA, float alpha)
 {
-    float earlySaturate = dA / c_earlySat;  // must be between [0.0f, dA)
+    float earlySaturate = dA / c_earlySatA;  // must be between [0.0f, dA)
     float t = 0.0f;
     t += (1 - smoothstep(A + earlySaturate, A + dA, alpha)) * step(A, alpha);
     t += smoothstep(A - dA, A - earlySaturate, alpha) * step(alpha, A);
@@ -41,15 +41,17 @@ float genSegment(float A, float dA, float alpha)
 
 vec4 lightColorer()
 {
-    
-    vec4 diff = vec4(colorDiffuse, 1.0f);
+    // Compute separate colors for bilboard elements
+    // ==============================================
+
     vec4 spec = vec4(colorSpecular, 1.0f);
-    vec4 color = vec4(0.0f);
+    vec4 diffInner = vec4(colorDiffuse, 1.0f);
+    vec4 diffOuter = vec4(colorDiffuse, 1.0f);
     float l = length(fs_in.SquarePos);
 
     // central point color
     float ts = 1 - smoothstep(0, c_r, l);
-    color += ts * spec;
+    spec.a *= ts;
 
     float td1 = genCircle(c_R1, c_dR1, l); // inner circle color
     float td2 = genCircle(c_R2, c_dR2, l); // outer circle color
@@ -79,8 +81,17 @@ vec4 lightColorer()
                 isEvenR ? genSegment(center_a + da, da / 2.0f + b, a) : 
                 isEvenL ? genSegment(center_a - da, da / 2.0f + b, a) : 0.0f;
 
-    color += ta1 * td1 * diff;  // inner circle is devided into segments
-    color += td2 * diff;        // outer circle is drawn in full
+    diffInner.a *= ta1 * td1; // inner circle is devided into segments
+    diffOuter.a *= td2; // outer circle is drawn in full
+
+    // Alpha blending 
+    // ==============
+
+    vec4 color = vec4(0.0f);
+    color.a = spec.a + diffInner.a + diffOuter.a; 
+    color.rgb += step(diffInner.a, 0.0f) * step(diffOuter.a, 0.0f) * spec.rgb; 
+    color.rgb += step(spec.a, 0.0f) * step(diffOuter.a, 0.0f) * diffInner.rgb; 
+    color.rgb += step(spec.a, 0.0f) * step(diffInner.a, 0.0f) * diffOuter.rgb;
 
     return color;
 }
