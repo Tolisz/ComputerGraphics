@@ -2,20 +2,25 @@
 
 #define M_PI 3.1415926535897932384626433832795
 
+in VS_OUT
+{
+    vec2 SquarePos; /* All interpolated values are inside the square [-1, 1] x [-1, 1] */
+} fs_in;
+
 layout(location = 0) out vec4 FragColor;
 
-in vec2 SquarePos;
+uniform vec3 colorDiffuse;  /* Color of the inner and outer circles */
+uniform vec3 colorSpecular; /* Color of the dot inside the billboard */
 
-uniform vec3 colorDiffuse;
-uniform vec3 colorSpecular;
-
-const float c_r = 0.35;
-const float c_R1 = 0.60;
-const float c_R2 = 0.90;
-const float c_dR1 = 0.15;
-const float c_dR2 = 0.10;
-const float c_N = 14;     // Number of segments
-const float c_earlySat = 2.0f;
+// [BEGIN] PARAMETERS
+const float c_r = 0.35; /* Radius of the dot inside the billboard */
+const float c_R1 = 0.60; /* Radius of the inner circle, where its saturation is maximum */
+const float c_R2 = 0.85; /* Radius of the outer circle, where its saturation is maximum */
+const float c_dR1 = 0.15; /* Radius delta of the inner circle. */
+const float c_dR2 = 0.10; /* Radius delta of the outer circle. */
+const float c_N = 14; /* Number of segments on which the billboard will be devided. Only even segments of the inner circle are drawn*/
+const float c_earlySat = 2.0f;  /* See genSegment function */
+// [END] PARAMETERS
 
 float genCircle(float R, float dR, float l)
 {
@@ -25,7 +30,7 @@ float genCircle(float R, float dR, float l)
     return t;
 }
 
-float genAlpha(float A, float dA, float alpha)
+float genSegment(float A, float dA, float alpha)
 {
     float earlySaturate = dA / c_earlySat;  // must be between [0.0f, dA)
     float t = 0.0f;
@@ -36,10 +41,11 @@ float genAlpha(float A, float dA, float alpha)
 
 vec4 lightColorer()
 {
+    
     vec4 diff = vec4(colorDiffuse, 1.0f);
     vec4 spec = vec4(colorSpecular, 1.0f);
     vec4 color = vec4(0.0f);
-    float l = length(SquarePos);
+    float l = length(fs_in.SquarePos);
 
     // central point color
     float ts = 1 - smoothstep(0, c_r, l);
@@ -48,16 +54,19 @@ vec4 lightColorer()
     float td1 = genCircle(c_R1, c_dR1, l); // inner circle color
     float td2 = genCircle(c_R2, c_dR2, l); // outer circle color
 
-    float da = (2.0f * M_PI) / c_N;   // segment's angle
-    float a = atan(-SquarePos.x, -SquarePos.y); // angle from Up Y axis to Right X axis
+    // delta alpha - angle of one segment. 
+    float da = (2.0f * M_PI) / c_N;  
+    // alpha - angle from Up Y axis to Right X axis of a fragment
+    float a = atan(-fs_in.SquarePos.x, -fs_in.SquarePos.y); 
     a += M_PI;  // from [-PI, +PI] to [0, 2 * PI]
-    a = mod(a + da / 2, 2 * M_PI); // Rotate d_alpha/2 left
+    a = mod(a + da / 2, 2 * M_PI); // Rotate da/2 left
 
-    float b = da / 2.0f;
+    // betta - angle which defines an enlargement angle of a drawn segment
+    float b = da / 2.0f;  
 
     float begin = floor(a / da);
-    float beginR = floor((a + b) / da);
-    float beginL = floor((a - b) / da);
+    float beginR = floor((a + b) / da); // If we go right (clockwise order) are we in drawn segment
+    float beginL = floor((a - b) / da); // If we go left (counterclockwise order) are we in drawn segment
     
     bool isEven = mod(begin, 2.0f) == 0.0f; 
     bool isEvenR = mod(beginR, 2.0f) == 0.0f;
@@ -66,12 +75,12 @@ vec4 lightColorer()
     float end = ceil(a / da); 
     float center_a = ((begin + end) * da) / 2.0f;
     
-    float ta1 = isEven  ? genAlpha(center_a, da / 2.0f + b, a) : 
-                isEvenR ? genAlpha(center_a + da, da / 2.0f + b, a) : 
-                isEvenL ? genAlpha(center_a - da, da / 2.0f + b, a) : 0.0f;
+    float ta1 = isEven  ? genSegment(center_a, da / 2.0f + b, a) : 
+                isEvenR ? genSegment(center_a + da, da / 2.0f + b, a) : 
+                isEvenL ? genSegment(center_a - da, da / 2.0f + b, a) : 0.0f;
 
-    color += ta1 * td1 * diff;
-    color += td2 * diff;
+    color += ta1 * td1 * diff;  // inner circle is devided into segments
+    color += td2 * diff;        // outer circle is drawn in full
 
     return color;
 }

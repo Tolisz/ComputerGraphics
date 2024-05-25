@@ -1,17 +1,26 @@
 #version 460 core 
 
+/* Uncomment it if you want to test how fragment shader works */
+//#define TEST_FRAGMENT_SHADER
+
 layout(location = 0) in vec3 iSquarePos;
+
+out VS_OUT
+{
+    vec2 SquarePos;
+} vs_out;
 
 uniform mat4 view;
 uniform mat4 projection;
-uniform vec3 billboardPos;
 
-// billboard's size in pixels
-const ivec2 billboardSize = ivec2(400, 400);
-//const ivec2 billboardSize = ivec2(25, 25);
-uniform ivec2 screenSize;
+uniform vec3 billboardPos;  /* billboard's world position. */
+uniform ivec2 screenSize;   /* screen size in pixels */
 
-out vec2 SquarePos;
+#ifndef TEST_FRAGMENT_SHADER
+    const ivec2 billboardSize = ivec2(25, 25); /* billboard's size in pixels */
+#else
+    const ivec2 billboardSize = ivec2(400, 400);
+#endif
 
 void main()
 {
@@ -25,5 +34,5 @@ void main()
     gl_Position = projBillboardPos;
 
     // Interpolate squarePos for fragment shader computations
-    SquarePos = iSquarePos.xy;
+    vs_out.SquarePos = iSquarePos.xy;
 }
