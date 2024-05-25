@@ -8,6 +8,8 @@
 #include "waterGrid.h"
 #include "light.h"
 
+#include <vector>
+
 struct ImGuiSizeCallbackData;
 
 class duckWindow: public glfwWindowWrap
@@ -34,8 +36,9 @@ private:
     waterGrid m_obj_water;
     shader m_sh_water;
 
-    light m_testLight;
-    shader m_sh_testLight;
+    const int m_maxLightsNum = 5;
+    std::vector<light> m_lights;
+    shader m_sh_light;
 
     // *=*=*=*=*=*=*=*=*=*=
     //         GUI
@@ -66,7 +69,10 @@ private:
 
 private:
 
-    
+    void DrawLights(
+        const glm::mat4& view,
+        const glm::mat4& projection
+    );
 
 private: 
 

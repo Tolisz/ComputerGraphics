@@ -24,15 +24,43 @@ void duckWindow::RunInit()
     m_gui_FrameNumToSum = 100;
     m_gui_AvarageFrameNumRenderTime = 0.0f;
 
+    // GLFW 
+    // ======================
+
     SetUpWindowsCallbacks();
     m_windowState = wState::DEFALUT;
 
-    m_testCube.Init();
+    // Scene
+    // ======================
+    
+    // Lights
+    m_lights.reserve(m_maxLightsNum);
+    light l; 
+    l.InitGL(); 
 
-    m_sh_testCube.Init();
-    m_sh_testCube.AttachShader("shaders/test.vert", GL_VERTEX_SHADER);
-    m_sh_testCube.AttachShader("shaders/test.frag", GL_FRAGMENT_SHADER);
-    m_sh_testCube.Link();
+    l.m_position = glm::vec3(1.0f, 0.0f, 1.0f);
+    l.m_diffuseColor = glm::vec3(0.0f, 0.0f, 1.0f);
+    l.m_specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    m_lights.push_back(l);
+
+    l.m_position = glm::vec3(-1.0f, 0.0f, -1.0f);
+    l.m_diffuseColor = glm::vec3(0.0f, 1.0f, 0.0f);
+    l.m_specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    m_lights.push_back(l);
+
+    m_sh_light.Init();
+    m_sh_light.AttachShader("shaders/lightBillboard.vert", GL_VERTEX_SHADER);
+    m_sh_light.AttachShader("shaders/lightBillboard.frag", GL_FRAGMENT_SHADER);
+    m_sh_light.Link();
+
+    // water
+
+    // m_testCube.Init();
+
+    // m_sh_testCube.Init();
+    // m_sh_testCube.AttachShader("shaders/test.vert", GL_VERTEX_SHADER);
+    // m_sh_testCube.AttachShader("shaders/test.frag", GL_FRAGMENT_SHADER);
+    // m_sh_testCube.Link();
 
     m_obj_water.InitGL();
     
@@ -42,16 +70,6 @@ void duckWindow::RunInit()
     m_sh_water.Link();
 
     m_textTexture = texture::CreateTexture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
-
-    m_testLight.InitGL();
-    m_testLight.m_position = glm::vec3(1.0f, 0.0f, 0.0f);
-    m_testLight.m_diffuseColor = glm::vec3(0.0f, 1.0f, 0.0f);
-    m_testLight.m_specularColor = glm::vec3(1.0f, 0.0f, 0.0f);
-
-    m_sh_testLight.Init();
-    m_sh_testLight.AttachShader("shaders/lightBillboard.vert", GL_VERTEX_SHADER);
-    m_sh_testLight.AttachShader("shaders/lightBillboard.frag", GL_FRAGMENT_SHADER);
-    m_sh_testLight.Link();
 
     glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
@@ -90,21 +108,38 @@ void duckWindow::RunRenderTick()
     m_sh_water.setM4fv("projection", GL_FALSE, projection);
     m_obj_water.Draw();
 
-    m_sh_testLight.Use();
-    m_sh_testLight.setM4fv("view", GL_FALSE, view);
-    m_sh_testLight.setM4fv("projection", GL_FALSE, projection);
-    m_sh_testLight.set3fv("colorDiffuse", m_testLight.m_diffuseColor);
-    m_sh_testLight.set3fv("colorSpecular", m_testLight.m_specularColor);
-    m_sh_testLight.set3fv("billboardPos", m_testLight.m_position);
-    m_sh_testLight.set2i("screenSize", m_width, m_height);
-    m_testLight.Draw();
+    DrawLights(view, projection);
 
     RenderGUI();
 }
 
+void duckWindow::DrawLights(
+    const glm::mat4& view,
+    const glm::mat4& projection
+)
+{
+    m_sh_light.Use();
+    m_sh_light.setM4fv("view", GL_FALSE, view);
+    m_sh_light.setM4fv("projection", GL_FALSE, projection);
+    m_sh_light.set2i("screenSize", m_width, m_height);
+
+    for (int i = 0; i < m_lights.size(); i++) { 
+        m_sh_light.set3fv("colorDiffuse", m_lights[i].m_diffuseColor);
+        m_sh_light.set3fv("colorSpecular", m_lights[i].m_specularColor);
+        m_sh_light.set3fv("billboardPos", m_lights[i].m_position);
+
+        m_lights[i].Draw();
+    }
+}
+
+
 
 void duckWindow::RunClear()
 {
+    if (m_lights.size() != 0) {
+        m_lights[0].DeInitGL();
+    }
+
 
 }
 
@@ -122,7 +157,7 @@ void duckWindow::RenderGUI()
     ImGui::Begin("Project: Duck", (bool*)0, flags);
     GenGUI_AppStatistics();
     GenGUI_Light();
-    //ImGui::ShowDemoWindow();
+    ImGui::ShowDemoWindow();
     ImGui::End();
 
     // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
@@ -181,9 +216,19 @@ void duckWindow::GenGUI_AppStatistics()
 
 void duckWindow::GenGUI_Light()
 {
-    if(ImGui::CollapsingHeader("Lights"))
+    if(ImGui::CollapsingHeader("Lights")) 
     {
-        
+        for (int i = 0; i < m_lights.size(); i++) {
+            std::string separatorName = "light ";
+            separatorName += std::to_string(i);
+            
+            ImGui::PushID(i);
+            ImGui::SeparatorText(separatorName.c_str());
+            ImGui::DragFloat3("position", (float*)&m_lights[i].m_position, 0.1f);
+            ImGui::ColorEdit3("diffuse", (float*)&m_lights[i].m_diffuseColor);
+            ImGui::ColorEdit3("specular", (float*)&m_lights[i].m_specularColor);
+            ImGui::PopID();
+        }
     }
 }
 

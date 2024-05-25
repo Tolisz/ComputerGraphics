@@ -27,15 +27,7 @@ light::light()
 {}
 
 light::~light()
-{
-    if (!m_gl_isInit)
-        return;
-    
-    glDeleteVertexArrays(1, &m_gl_VAO);
-    glDeleteBuffers(1, &m_gl_VBO);
-    glDeleteBuffers(1, &m_gl_EBO);
-    m_gl_isInit = false;
-}
+{}
 
 void light::InitGL()
 {
@@ -68,4 +60,15 @@ void light::Draw()
     glBindVertexArray(m_gl_VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
+}
+
+void light::DeInitGL()
+{
+    if (!m_gl_isInit)
+        return;
+    
+    glDeleteVertexArrays(1, &m_gl_VAO);
+    glDeleteBuffers(1, &m_gl_VBO);
+    glDeleteBuffers(1, &m_gl_EBO);
+    m_gl_isInit = false;
 }

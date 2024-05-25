@@ -36,8 +36,8 @@ public:
     light();
     ~light();
 
-    light(const light&) = delete;
-    light(light&&) = delete;
+    light(const light&) = default;
+    light(light&&) = default;
     light& operator=(const light&) = delete;
     light& operator=(light&&) = delete;
 
@@ -46,6 +46,8 @@ public:
     // *=*=*=*=*=*=*=*=*=*=
 
     void InitGL();
+    void DeInitGL();
+    
     void Draw();
 
 private:
