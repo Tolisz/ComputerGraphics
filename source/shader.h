@@ -40,6 +40,7 @@ public:
     void set1b(const char* name, GLboolean value);
     void set1f(const char* name, GLfloat v0);
     void set1ui(const char* name, GLuint v0);
+    void set2i(const char* name, GLint v0, GLint v1);
     void set3f(const char* name, GLfloat v0, GLfloat v1, GLfloat v2);
     void set3fv(const char* name, const glm::vec3& value);
     void setM4fv(const char* name, GLboolean transpose, const glm::mat4& matrix);

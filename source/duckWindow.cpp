@@ -44,12 +44,14 @@ void duckWindow::RunInit()
     m_textTexture = texture::CreateTexture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
 
     m_testLight.InitGL();
-    
+    m_testLight.m_position = glm::vec3(0.0f, 0.0f, 0.0f);
+    m_testLight.m_diffuseColor = glm::vec3(0.3f, 0.2f, 0.1f);
+    m_testLight.m_specularColor = glm::vec3(0.3f, 0.2f, 0.1f);
+
     m_sh_testLight.Init();
     m_sh_testLight.AttachShader("shaders/lightBillboard.vert", GL_VERTEX_SHADER);
     m_sh_testLight.AttachShader("shaders/lightBillboard.frag", GL_FRAGMENT_SHADER);
     m_sh_testLight.Link();
-
 
     glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
@@ -87,6 +89,10 @@ void duckWindow::RunRenderTick()
     m_sh_testLight.Use();
     m_sh_testLight.setM4fv("view", GL_FALSE, view);
     m_sh_testLight.setM4fv("projection", GL_FALSE, projection);
+    m_sh_testLight.set3fv("colorDiffuse", m_testLight.m_diffuseColor);
+    m_sh_testLight.set3fv("colorSpecular", m_testLight.m_specularColor);
+    m_sh_testLight.set3fv("billboardPos", m_testLight.m_position);
+    m_sh_testLight.set2i("screenSize", m_width, m_height);
     m_testLight.Draw();
 
     RenderGUI();
@@ -296,7 +302,11 @@ void duckWindow::CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
     switch (win->GetState())
     {
     case wState::CAMERA_MOVE:
-        win->m_camera.UpdatePosition(deltaY * win->m_camera.m_cameraSpeed);
+        {
+            win->m_camera.UpdatePosition(deltaY * win->m_camera.m_cameraSpeed);
+            glm::vec3 v = win->m_camera.m_worldPos;
+            std::cout << v.x << "," << v.y << "," << v.z << std::endl;
+        }
         break;
     
     case wState::CAMERA_ROTATE:

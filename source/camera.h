@@ -6,7 +6,7 @@ class camera
 {
 
     
-private:
+public:
     glm::vec3 m_worldPos;
     glm::vec3 m_front;
     glm::vec3 m_right;
