@@ -6,6 +6,7 @@
 #include "shader.h"
 #include "texture.h"
 #include "waterGrid.h"
+#include "light.h"
 
 struct ImGuiSizeCallbackData;
 
@@ -32,6 +33,9 @@ private:
 
     waterGrid m_obj_water;
     shader m_sh_water;
+
+    light m_testLight;
+    shader m_sh_testLight;
 
     // *=*=*=*=*=*=*=*=*=*=
     //         GUI
@@ -62,12 +66,13 @@ private:
 
 private:
 
-
+    
 
 private: 
 
     void RenderGUI();
     void GenGUI_AppStatistics();
+    void GenGUI_Light();
     static void InfoWindowSizeCallback(ImGuiSizeCallbackData* data);
 
 private: 

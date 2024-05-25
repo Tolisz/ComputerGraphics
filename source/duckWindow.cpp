@@ -43,6 +43,13 @@ void duckWindow::RunInit()
 
     m_textTexture = texture::CreateTexture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
 
+    m_testLight.InitGL();
+    
+    m_sh_testLight.Init();
+    m_sh_testLight.AttachShader("shaders/lightBillboard.vert", GL_VERTEX_SHADER);
+    m_sh_testLight.AttachShader("shaders/lightBillboard.frag", GL_FRAGMENT_SHADER);
+    m_sh_testLight.Link();
+
 
     glClearColor(1.0f, 0.0f, 1.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
@@ -61,19 +68,26 @@ void duckWindow::RunRenderTick()
     
     float aspect = static_cast<float>(m_width)/m_height;
 
-    m_sh_testCube.Use();
-    m_sh_testCube.setM4fv("model", GL_FALSE, glm::mat4(1.0f));
-    m_sh_testCube.setM4fv("view", GL_FALSE, m_camera.GetViewMatrix());
-    m_sh_testCube.setM4fv("projection", GL_FALSE, m_camera.GetProjectionMatrix(aspect));
+    glm::mat4 view = m_camera.GetViewMatrix();
+    glm::mat4 projection = m_camera.GetProjectionMatrix(aspect);
 
-    m_testCube.Draw();
+    // m_sh_testCube.Use();
+    // m_sh_testCube.setM4fv("model", GL_FALSE, glm::mat4(1.0f));
+    // m_sh_testCube.setM4fv("view", GL_FALSE, view);
+    // m_sh_testCube.setM4fv("projection", GL_FALSE, projection);
+    // m_testCube.Draw();
 
     m_obj_water.SimulateWater();
     m_sh_water.Use();
     m_sh_water.setM4fv("model", GL_FALSE, glm::mat4(1.0f));
-    m_sh_water.setM4fv("view", GL_FALSE, m_camera.GetViewMatrix());
-    m_sh_water.setM4fv("projection", GL_FALSE, m_camera.GetProjectionMatrix(aspect));
+    m_sh_water.setM4fv("view", GL_FALSE, view);
+    m_sh_water.setM4fv("projection", GL_FALSE, projection);
     m_obj_water.Draw();
+
+    m_sh_testLight.Use();
+    m_sh_testLight.setM4fv("view", GL_FALSE, view);
+    m_sh_testLight.setM4fv("projection", GL_FALSE, projection);
+    m_testLight.Draw();
 
     RenderGUI();
 }
@@ -97,6 +111,7 @@ void duckWindow::RenderGUI()
     ImGui::SetNextWindowSizeConstraints(ImVec2(200.0f, -1), ImVec2(FLT_MAX, -1), &duckWindow::InfoWindowSizeCallback, (void*)this);
     ImGui::Begin("Project: Duck", (bool*)0, flags);
     GenGUI_AppStatistics();
+    GenGUI_Light();
     ImGui::ShowDemoWindow();
     ImGui::End();
 
@@ -151,6 +166,14 @@ void duckWindow::GenGUI_AppStatistics()
                 } 
             }
         }
+    }
+}
+
+void duckWindow::GenGUI_Light()
+{
+    if(ImGui::CollapsingHeader("Lights"))
+    {
+        
     }
 }
 
