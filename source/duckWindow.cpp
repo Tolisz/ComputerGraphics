@@ -224,9 +224,15 @@ void duckWindow::GenGUI_Light()
             
             ImGui::PushID(i);
             ImGui::SeparatorText(separatorName.c_str());
+            if (ImGui::BeginTable("split", 2))
+            {
+                ImGui::TableNextColumn();
+                ImGui::ColorEdit3("diffuse", (float*)&m_lights[i].m_diffuseColor, ImGuiColorEditFlags_NoInputs);
+                ImGui::TableNextColumn();
+                ImGui::ColorEdit3("specular", (float*)&m_lights[i].m_specularColor, ImGuiColorEditFlags_NoInputs);
+                ImGui::EndTable();
+            }
             ImGui::DragFloat3("position", (float*)&m_lights[i].m_position, 0.1f);
-            ImGui::ColorEdit3("diffuse", (float*)&m_lights[i].m_diffuseColor);
-            ImGui::ColorEdit3("specular", (float*)&m_lights[i].m_specularColor);
             ImGui::PopID();
         }
     }
