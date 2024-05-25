@@ -305,7 +305,6 @@ void duckWindow::CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
         {
             win->m_camera.UpdatePosition(deltaY * win->m_camera.m_cameraSpeed);
             glm::vec3 v = win->m_camera.m_worldPos;
-            std::cout << v.x << "," << v.y << "," << v.z << std::endl;
         }
         break;
     
