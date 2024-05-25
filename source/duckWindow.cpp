@@ -45,8 +45,8 @@ void duckWindow::RunInit()
 
     m_testLight.InitGL();
     m_testLight.m_position = glm::vec3(0.0f, 0.0f, 0.0f);
-    m_testLight.m_diffuseColor = glm::vec3(0.3f, 0.2f, 0.1f);
-    m_testLight.m_specularColor = glm::vec3(0.3f, 0.2f, 0.1f);
+    m_testLight.m_diffuseColor = glm::vec3(0.0f, 1.0f, 0.0f);
+    m_testLight.m_specularColor = glm::vec3(1.0f, 0.0f, 0.0f);
 
     m_sh_testLight.Init();
     m_sh_testLight.AttachShader("shaders/lightBillboard.vert", GL_VERTEX_SHADER);
@@ -118,7 +118,7 @@ void duckWindow::RenderGUI()
     ImGui::Begin("Project: Duck", (bool*)0, flags);
     GenGUI_AppStatistics();
     GenGUI_Light();
-    ImGui::ShowDemoWindow();
+    //ImGui::ShowDemoWindow();
     ImGui::End();
 
     // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=

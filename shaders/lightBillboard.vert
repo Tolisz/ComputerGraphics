@@ -7,8 +7,11 @@ uniform mat4 projection;
 uniform vec3 billboardPos;
 
 // billboard's size in pixels
-const ivec2 billboardSize = ivec2(120, 120);
+const ivec2 billboardSize = ivec2(400, 400);
+//const ivec2 billboardSize = ivec2(25, 25);
 uniform ivec2 screenSize;
+
+out vec2 SquarePos;
 
 void main()
 {
@@ -20,4 +23,7 @@ void main()
     // also take into accound the size of the billboard in screen space  
     projBillboardPos.xy += iSquarePos.xy * billboardSize / vec2(screenSize);     
     gl_Position = projBillboardPos;
+
+    // Interpolate squarePos for fragment shader computations
+    SquarePos = iSquarePos.xy;
 }
