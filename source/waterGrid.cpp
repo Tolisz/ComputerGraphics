@@ -167,9 +167,9 @@ void waterGrid::PrepareShaders()
     m_sh_computeNormals.Link();
 
     m_sh_computeNormals.Use();
-    m_sh_computeNormals.set1ui("N", m_N);
-    m_sh_waterSimulation.set1f("h", m_h);
-    m_sh_waterSimulation.set1f("a", m_a);
+    m_sh_computeNormals.set1i("N", m_N);
+    m_sh_computeNormals.set1f("h", m_h);
+    m_sh_computeNormals.set1f("a", m_a);
 }
 
 void waterGrid::PrepareTextures() 
