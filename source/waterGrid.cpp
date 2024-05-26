@@ -157,7 +157,7 @@ void waterGrid::PrepareShaders()
     m_sh_waterSimulation.Link();
 
     m_sh_waterSimulation.Use();
-    m_sh_waterSimulation.set1ui("N", m_N);
+    m_sh_waterSimulation.set1i("N", m_N);
     m_sh_waterSimulation.set1f("dt", m_dt);
     m_sh_waterSimulation.set1f("c", m_c);
     m_sh_waterSimulation.set1f("h", m_h);
