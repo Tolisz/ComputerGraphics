@@ -58,7 +58,7 @@ void duckWindow::RunInit()
     m.kd = glm::vec3(1.0f);
     m.ks = glm::vec3(0.5f);
     m.shininess = 128.0f;
-    m_materials.insert(std::make_pair("default", m));
+    m_materials.insert(std::make_pair("water", m));
 
     // water
 
@@ -162,7 +162,7 @@ void duckWindow::DrawWater(
         m_sh_water.set3fv((name + ".specularColor").c_str(), m_obj_lights[i].m_specularColor);
     }
 
-    const material& mat = m_materials["default"]; 
+    const material& mat = m_materials["water"]; 
     m_sh_water.set3fv("material.ka", mat.ka);
     m_sh_water.set3fv("material.kd", mat.kd);
     m_sh_water.set3fv("material.ks", mat.ks);
@@ -199,6 +199,7 @@ void duckWindow::RenderGUI()
     ImGui::Begin("Project: Duck", (bool*)0, flags);
     GenGUI_AppStatistics();
     GenGUI_Light();
+    GenGUI_Materials();
     ImGui::ShowDemoWindow();
     ImGui::End();
 
@@ -277,6 +278,30 @@ void duckWindow::GenGUI_Light()
             }
             ImGui::DragFloat3("position", (float*)&m_obj_lights[i].m_position, 0.1f);
             ImGui::PopID();
+        }
+    }
+}
+
+void duckWindow::GenGUI_Materials()
+{
+    if(ImGui::CollapsingHeader("Materials")) 
+    {   
+        int i = 0;
+        for (auto& [key, value] : m_materials) {
+            ImGui::SeparatorText(key.c_str());
+            if (ImGui::BeginTable("split", 3)) 
+            {
+                ImGui::TableNextColumn();
+                ImGui::ColorEdit3("ka", (float*)&value.ka, ImGuiColorEditFlags_NoInputs);
+                ImGui::TableNextColumn();
+                ImGui::ColorEdit3("kd", (float*)&value.kd, ImGuiColorEditFlags_NoInputs);
+                ImGui::TableNextColumn();
+                ImGui::ColorEdit3("ks", (float*)&value.ks, ImGuiColorEditFlags_NoInputs);
+                ImGui::EndTable();
+            }
+            ImGui::DragFloat("shinness", &value.shininess, 1.0f);
+            
+            i++;
         }
     }
 }

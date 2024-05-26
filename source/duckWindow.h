@@ -93,6 +93,7 @@ private:
     void RenderGUI();
     void GenGUI_AppStatistics();
     void GenGUI_Light();
+    void GenGUI_Materials();
     static void InfoWindowSizeCallback(ImGuiSizeCallbackData* data);
 
 private: 
