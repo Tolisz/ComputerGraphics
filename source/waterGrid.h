@@ -57,7 +57,7 @@ public:
     void InitGL();
     void DeInitGL();
     
-    void SimulateWater();
+    void SimulateWater(float dt);
     void DisturbWaterAt(glm::vec2 coords, float newHeight);
     void Draw();
 

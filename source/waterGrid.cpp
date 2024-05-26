@@ -39,7 +39,7 @@ void waterGrid::Draw()
     glBindVertexArray(0);
 }
 
-void waterGrid::SimulateWater()
+void waterGrid::SimulateWater(float dt)
 {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_gl_PreviousPosBuffer);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_gl_CurrentPosBuffer);
@@ -49,7 +49,6 @@ void waterGrid::SimulateWater()
 
     // Compute new height of water elements
     m_sh_waterSimulation.Use();
-    
     if (m_bShouldDisturb) {
         m_sh_waterSimulation.set1i("i_disturb", m_iDisturb);
         m_sh_waterSimulation.set1i("j_disturb", m_jDisturb);
@@ -163,7 +162,7 @@ void waterGrid::PrepareShaders()
     m_sh_waterSimulation.set1f("h", m_h);
 
     m_sh_computeNormals.Init();
-    m_sh_computeNormals.AttachShader("shaders/computeNormals.comp", GL_COMPUTE_SHADER);
+    m_sh_computeNormals.AttachShader("shaders/waterNormals.comp", GL_COMPUTE_SHADER);
     m_sh_computeNormals.Link();
 
     m_sh_computeNormals.Use();

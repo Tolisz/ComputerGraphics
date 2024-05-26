@@ -56,13 +56,15 @@ vec3 Phong(vec3 worldPos, vec3 norm, vec3 view)
     return intensity;
 }
 
+
+
 void main()
 {   
-    vec3 norm = vec3(0.0f, 1.0f, 0.0f);
+    vec3 norm = texture(normalTex, i.texCoords).xyz;
     vec3 view = cameraPos - i.worldPos;
 
     vec3 intensity = Phong(i.worldPos, norm, view);
-    // FragColor = vec4(intensity * objectColor, 1.0f);
+    FragColor = vec4(intensity * objectColor, 1.0f);
     // FragColor = vec4(texture(normalTex, i.texCoords).xyz, 1.0f);
-    FragColor = vec4(texture(normalTex, i.texCoords).xyz, 1.0f);
+    // FragColor = vec4(texture(normalTex, i.texCoords).xyz, 1.0f);
 }

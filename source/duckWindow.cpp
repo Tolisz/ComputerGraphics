@@ -8,6 +8,8 @@
 #include <cmath>
 
 duckWindow::duckWindow()
+    : m_gen(m_rd()), 
+      m_uniformZeroToOne(0.0f, 1.0f)
 {}
 
 duckWindow::~duckWindow()
@@ -21,6 +23,9 @@ void duckWindow::RunInit()
     m_gui_FrameNumRenderTimeCounter = 0.0f;
     m_gui_FrameNumToSum = 100;
     m_gui_AvarageFrameNumRenderTime = 0.0f;
+
+    const GLubyte* renderer = glGetString(GL_RENDERER);
+    m_gui_renderer = std::string((const char*)renderer);
 
     // GLFW 
     // ======================
@@ -144,10 +149,14 @@ void duckWindow::DrawWater(
     const glm::mat4& view,
     const glm::mat4& projection
 )
-{
-    m_obj_water.DisturbWaterAt({0.0f, 0.0f}, -0.25f);
-    m_obj_water.SimulateWater();
+{   
+    // Distribute and simulate water
+    // =============================
+    DisturbWater();
+    m_obj_water.SimulateWater(m_deltaTime);
 
+    // Draw water
+    // =============================
     m_sh_water.Use();
     //m_sh_water.setM4fv("model", GL_FALSE, glm::mat4(1.0f));
     m_sh_water.setM4fv("view", GL_FALSE, view);
@@ -181,6 +190,26 @@ void duckWindow::DrawWater(
     m_obj_water.Draw();
 }
 
+void duckWindow::DisturbWater()
+{
+    float a = m_obj_water.GetA();
+
+    if (!m_bDrop && m_uniformZeroToOne(m_gen) <= m_dropProbability) {
+        m_bDrop = true;
+        m_dropPos = glm::vec2(m_uniformZeroToOne(m_gen), m_uniformZeroToOne(m_gen));
+        m_dropPos *= a;
+        m_dropPos -= a/2;
+        m_curretDropDepth = 0.0f;
+    }    
+
+    if (m_bDrop) {
+        m_curretDropDepth -= (-m_maxDropDepth / m_dropDepthTime) * m_deltaTime;
+        m_obj_water.DisturbWaterAt(m_dropPos, m_curretDropDepth);
+        if (m_curretDropDepth <= m_maxDropDepth) {
+            m_bDrop = false;
+        }
+    }
+}
 
 
 void duckWindow::RunClear()
@@ -208,7 +237,7 @@ void duckWindow::RenderGUI()
     GenGUI_AppStatistics();
     GenGUI_Light();
     GenGUI_Materials();
-    //ImGui::ShowDemoWindow();
+    ImGui::ShowDemoWindow();
     ImGui::End();
 
     // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
@@ -222,18 +251,29 @@ void duckWindow::GenGUI_AppStatistics()
         m_gui_FrameNumToSumCounter = 0;
         m_gui_AvarageFrameNumRenderTime = m_gui_FrameNumRenderTimeCounter / m_gui_FrameNumToSum;
         m_gui_FrameNumRenderTimeCounter = 0.0f;
-        m_gui_FrameNumToSum = static_cast<int>(std::ceilf(0.5f / m_gui_AvarageFrameNumRenderTime));
+        m_gui_FrameNumToSum = static_cast<int>(std::max(std::ceilf(0.5f / m_gui_AvarageFrameNumRenderTime), 1.0f));
     }
     else {
         m_gui_FrameNumToSumCounter++;
         m_gui_FrameNumRenderTimeCounter += m_deltaTime;
     }
 
+    auto resetFPSCounter = [&](int swapValue) {
+        glfwSwapInterval(swapValue);
+        m_gui_FrameNumToSumCounter = 1;
+        m_gui_FrameNumToSum = 1;
+    };
+
     static bool fpsLimit = true;
     bool prevFpsLimit = fpsLimit;
 
+    const char* swapIntervals[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+    static int currentSwapInterval = 0;
+
     if(ImGui::CollapsingHeader("App Statistics"))
     {
+        ImGui::TextColored(ImVec4(0.231f, 0.820f, 0.0984f, 1.0f), m_gui_renderer.c_str());
+
         if (ImGui::BeginTable("split", 2))
         {
             ImGui::TableNextColumn(); 
@@ -249,18 +289,29 @@ void duckWindow::GenGUI_AppStatistics()
             ImGui::TableNextColumn(); 
             ImGui::Text("MS = %.6f", m_gui_AvarageFrameNumRenderTime);
 
-            ImGui::EndTable();
-
             if (prevFpsLimit != fpsLimit) {
-                if (fpsLimit) {
-                    glfwSwapInterval(1);
-                    m_gui_FrameNumToSumCounter = 1;
-                    m_gui_FrameNumToSum = 1;
-                } 
-                else {
-                    glfwSwapInterval(0);
-                } 
+                resetFPSCounter(fpsLimit ? currentSwapInterval + 1 : 0);
             }
+
+            ImGui::TableNextColumn(); 
+            ImGui::BeginDisabled(!fpsLimit);
+            if (ImGui::BeginCombo("swap", swapIntervals[currentSwapInterval])) 
+            {
+                for (int i = 0; i < IM_ARRAYSIZE(swapIntervals); i++) {
+                    const bool is_selected = (i == currentSwapInterval);
+                    if (ImGui::Selectable(swapIntervals[i], is_selected)) 
+                    {
+                        currentSwapInterval = i;
+                        resetFPSCounter(currentSwapInterval + 1);
+                    }
+
+                    if (is_selected) ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            } 
+            ImGui::EndDisabled();
+            
+            ImGui::EndTable();
         }
     }
 }

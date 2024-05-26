@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <map>
+#include <random>
 
 struct ImGuiSizeCallbackData;
 
@@ -44,10 +45,23 @@ private:
     std::vector<light> m_obj_lights;
     shader m_sh_light;
 
-    // water
+    // Water
     waterGrid m_obj_water;
     shader m_sh_water;
     glm::vec3 m_waterColor;
+
+    float m_dropProbability = 0.03f;
+    float m_maxDropDepth = -0.1f;
+    float m_dropDepthTime = 0.05f; // in seconds
+
+    bool m_bDrop = false;
+    float m_curretDropDepth;
+    glm::vec2 m_dropPos;   
+
+    // Random numbers generators
+    std::random_device m_rd;
+    std::mt19937 m_gen;
+    std::uniform_real_distribution<float> m_uniformZeroToOne;
 
     // *=*=*=*=*=*=*=*=*=*=
     //         GUI
@@ -57,6 +71,8 @@ private:
     int m_gui_FrameNumToSum;
     float m_gui_FrameNumRenderTimeCounter;
     float m_gui_AvarageFrameNumRenderTime;
+
+    std::string m_gui_renderer;
 
 public:
     // *=*=*=*=*=*=*=*=*=*=
@@ -87,6 +103,7 @@ private:
         const glm::mat4& view,
         const glm::mat4& projection
     );
+    void DisturbWater();
 
 private: 
 
