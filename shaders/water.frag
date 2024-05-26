@@ -63,5 +63,6 @@ void main()
 
     vec3 intensity = Phong(i.worldPos, norm, view);
     // FragColor = vec4(intensity * objectColor, 1.0f);
+    // FragColor = vec4(texture(normalTex, i.texCoords).xyz, 1.0f);
     FragColor = vec4(texture(normalTex, i.texCoords).xyz, 1.0f);
 }

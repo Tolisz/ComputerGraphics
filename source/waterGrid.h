@@ -28,6 +28,13 @@ private:
     shader m_sh_waterSimulation;
     shader m_sh_computeNormals;
 
+private:
+
+    bool m_bShouldDisturb;
+    int m_iDisturb;
+    int m_jDisturb;
+    float m_disturbHeight;
+
 public:
 
     // *=*=*=*=*=*=*=*=*=*=
@@ -50,10 +57,13 @@ public:
     void InitGL();
     void DeInitGL();
     
-    GLuint GetNormalTex();
     void SimulateWater();
+    void DisturbWaterAt(glm::vec2 coords, float newHeight);
     void Draw();
 
+    GLuint GetNormalTex();
+    float GetA();
+    
 private:
 
     void PopulateBuffers();

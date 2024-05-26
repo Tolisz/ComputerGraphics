@@ -80,6 +80,8 @@ void duckWindow::RunInit()
 
     //m_textTexture = texture::CreateTexture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
 
+
+
     // OpenGL initial configuration
     // ============================
 
@@ -143,6 +145,7 @@ void duckWindow::DrawWater(
     const glm::mat4& projection
 )
 {
+    m_obj_water.DisturbWaterAt({0.0f, 0.0f}, -0.25f);
     m_obj_water.SimulateWater();
 
     m_sh_water.Use();
@@ -170,10 +173,11 @@ void duckWindow::DrawWater(
 
     m_sh_water.set3fv("cameraPos", m_camera.m_worldPos);
     m_sh_water.set3fv("objectColor", m_waterColor);
+    m_sh_water.set1f("a", m_obj_water.GetA());
 
     glActiveTexture(GL_TEXTURE0); 
     glBindTexture(GL_TEXTURE_2D, m_obj_water.GetNormalTex());
-    
+
     m_obj_water.Draw();
 }
 
@@ -204,7 +208,7 @@ void duckWindow::RenderGUI()
     GenGUI_AppStatistics();
     GenGUI_Light();
     GenGUI_Materials();
-    ImGui::ShowDemoWindow();
+    //ImGui::ShowDemoWindow();
     ImGui::End();
 
     // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=

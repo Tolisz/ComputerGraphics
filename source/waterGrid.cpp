@@ -3,6 +3,8 @@
 #include <vector>
 #include <glm/vec3.hpp>
 
+#include <iostream>
+
 waterGrid::waterGrid()
     : waterGrid(256, 2.0f, 1.0f)
 { }
@@ -47,20 +49,31 @@ void waterGrid::SimulateWater()
 
     // Compute new height of water elements
     m_sh_waterSimulation.Use();
+    
+    if (m_bShouldDisturb) {
+        m_sh_waterSimulation.set1i("i_disturb", m_iDisturb);
+        m_sh_waterSimulation.set1i("j_disturb", m_jDisturb);
+        m_sh_waterSimulation.set1f("disturbHeight", m_disturbHeight);
+    }
+    
     glDispatchCompute(m_N, m_N, 1);
     glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
+
+    if (m_bShouldDisturb) {
+        m_sh_waterSimulation.set1i("i_disturb", -1);
+        m_sh_waterSimulation.set1i("j_disturb", -1);
+        m_bShouldDisturb = false;
+    }
 
     // For computed height update normals;
     m_sh_computeNormals.Use();
     glDispatchCompute(m_N, m_N, 1);
     glMemoryBarrier(GL_TEXTURE_UPDATE_BARRIER_BIT);
 
-
-    // // swap buffers
-    // GLuint temp = m_gl_PreviousPosBuffer;
-    // m_gl_PreviousPosBuffer = m_gl_CurrentPosBuffer;
-    // m_gl_CurrentPosBuffer = temp;
-
+    // swap buffers
+    GLuint temp = m_gl_PreviousPosBuffer;
+    m_gl_PreviousPosBuffer = m_gl_CurrentPosBuffer;
+    m_gl_CurrentPosBuffer = temp;
 }
 
 void waterGrid::PopulateBuffers()
@@ -127,7 +140,7 @@ void waterGrid::PopulateBuffers()
     glBufferData(GL_ARRAY_BUFFER, indices.size() * sizeof(glm::uvec3), indices.data(), GL_STATIC_DRAW);
 
     glBindVertexArray(m_gl_VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_gl_CurrentPosBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, m_gl_PreviousPosBuffer);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_gl_EBO);
@@ -183,4 +196,20 @@ void waterGrid::DeInitGL()
 GLuint waterGrid::GetNormalTex()
 {
     return m_gl_normalTex;
+}
+
+float waterGrid::GetA()
+{
+    return m_a;
+}
+
+void waterGrid::DisturbWaterAt(glm::vec2 coords, float newHeight)
+{
+    coords += m_a / 2.0f;
+    glm::vec2 indices = glm::floor(((coords / m_a) * (float)m_N));
+    
+    m_bShouldDisturb = true;
+    m_iDisturb = (int)indices.x;
+    m_jDisturb = (int)indices.y;
+    m_disturbHeight = newHeight;
 }
