@@ -28,6 +28,7 @@ void waterGrid::InitGL()
     glGenBuffers(1, &m_gl_StartHeightBuffer);
     glGenBuffers(1, &m_gl_EndHeightBuffer);
     glGenBuffers(1, &m_gl_EBO);
+    glGenBuffers(1, &m_gl_DampingBuffer);
 
     PopulateBuffers();
 
@@ -48,6 +49,7 @@ void waterGrid::SimulateWater()
 {
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_gl_StartHeightBuffer);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_gl_EndHeightBuffer);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, m_gl_DampingBuffer);
 
     m_sh_waterSimulation.Use();
     m_sh_waterSimulation.set1ui("N", m_N);
@@ -59,17 +61,39 @@ void waterGrid::PopulateBuffers()
 {
     // water lies on XZ plane
     // *~*~*~*~*~*~*~*~*~*~*~*~*
-
+    //  
+    //  ^  ^  ^  ^  ^  ^  ^  ^  (N*N)
+    //  |  |  |  |  |  |  |  |
+    //  |  |  |  |  |  |  |  |
+    //  |  |  |  |  |  |  |  | 
+    //  |  |  |  |  |  |  |  | 
+    //  |  |  |  |  |  |  |  |
+    //  |  |  |  |  |  |  |  |
+    //  0  N  2N 3N 4N ...   N(N-1)
+    // 
+    // *~*~*~*~*~*~*~*~*~*~*~*~*
     std::vector<glm::vec4> points;
     points.reserve(m_N * m_N);
+    
+    std::vector<float> dampings;
+    dampings.reserve(m_N * m_N);
 
     float a_half = m_a / 2.0f;
-    float PosX, PoxZ;
+    glm::vec2 border(a_half);
+    float PosX, PosZ;
     for (int x = 0; x < m_N; x++) {
         for (int z = 0; z < m_N; z++) {
             PosX = -a_half + m_h * x;
-            PoxZ = -a_half + m_h * z;
-            points.push_back(glm::vec4(PosX, 0.0f, PoxZ, 1.0f));
+            PosZ = -a_half + m_h * z;
+            points.push_back(glm::vec4(PosX, 0.0f, PosZ, 1.0f));
+
+            // compute damping
+            glm::vec2 pos(PosX, PosZ);
+            glm::vec2 t1 = border - pos;
+            glm::vec2 t2 = pos - border;
+            glm::vec2 t = glm::min(t1, t2);
+            float l = glm::min(t.x, t.y);
+            dampings.push_back(0.95 * std::max(1.0f, l / 0.2f));
         }
     }
 
@@ -88,7 +112,10 @@ void waterGrid::PopulateBuffers()
     glBufferData(GL_ARRAY_BUFFER, points.size() * sizeof(glm::vec4), points.data(), GL_DYNAMIC_COPY);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_gl_EndHeightBuffer);
-    glBufferData(GL_ARRAY_BUFFER, points.size() * sizeof(glm::vec4), nullptr, GL_DYNAMIC_COPY);
+    glBufferData(GL_ARRAY_BUFFER, points.size() * sizeof(glm::vec4), points.data(), GL_DYNAMIC_COPY);
+
+    glBindBuffer(GL_ARRAY_BUFFER, m_gl_DampingBuffer);
+    glBufferData(GL_ARRAY_BUFFER, dampings.size() * sizeof(GLfloat), dampings.data(), GL_STATIC_READ);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_gl_EBO);
     glBufferData(GL_ARRAY_BUFFER, indices.size() * sizeof(glm::uvec3), indices.data(), GL_STATIC_DRAW);

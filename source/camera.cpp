@@ -8,8 +8,8 @@
 #include <glm/gtc/constants.hpp>
 
 camera::camera()
-    : m_worldPos(0.0f, 0.0f, -3.0f),
-      m_front(0.0f, 0.0f, 1.0f),
+    : m_worldPos(0.0f, 0.0f, 3.0f),
+      m_front(0.0f, 0.0f, -1.0f),
       m_right(1.0f, 0.0f, 0.0f),
       m_up(0.0f, 1.0f, 0.0f),
       m_target(0.0f, 0.0f, 0.0f),

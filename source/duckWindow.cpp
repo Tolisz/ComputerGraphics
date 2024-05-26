@@ -37,12 +37,12 @@ void duckWindow::RunInit()
     light l; 
     l.InitGL(); 
 
-    l.m_position = glm::vec3(0.9f, 0.0f, 0.9f);
+    l.m_position = glm::vec3(0.8f, 0.5f, 0.8f);
     l.m_diffuseColor = glm::vec3(0.0f, 0.0f, 1.0f);
     l.m_specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
     m_obj_lights.push_back(l);
 
-    l.m_position = glm::vec3(-0.9f, 0.0f, -0.9f);
+    l.m_position = glm::vec3(-0.8f, 0.5f, -0.8f);
     l.m_diffuseColor = glm::vec3(0.0f, 1.0f, 0.0f);
     l.m_specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
     m_obj_lights.push_back(l);
@@ -432,7 +432,7 @@ void duckWindow::CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
         break;
     
     case wState::CAMERA_ROTATE:
-        win->m_camera.UpdateRotation(-deltaX * win->m_camera.m_cameraSpeed, deltaY * win->m_camera.m_cameraSpeed);
+        win->m_camera.UpdateRotation(-deltaX * win->m_camera.m_cameraSpeed, -deltaY * win->m_camera.m_cameraSpeed);
         break;
 
     default:

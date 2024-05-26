@@ -20,6 +20,7 @@ private:
     GLuint m_gl_StartHeightBuffer;
     GLuint m_gl_EndHeightBuffer;
     GLuint m_gl_EBO;
+    GLuint m_gl_DampingBuffer;
 
     GLsizei m_gl_triangleCount;
 
