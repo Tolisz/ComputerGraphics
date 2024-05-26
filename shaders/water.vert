@@ -2,11 +2,16 @@
 
 layout(location = 0) in vec4 inPos;
 
-uniform mat4 model;
+out FS_IN
+{
+    vec3 worldPos;
+} o;
+
 uniform mat4 view;
 uniform mat4 projection;
 
 void main()
 {
-    gl_Position = projection * view * model * inPos;
+    o.worldPos = vec3(inPos);
+    gl_Position = projection * view * inPos;
 }

@@ -38,6 +38,7 @@ public:
     // *=*=*=*=*=*=*=*=*=*=*=*
 
     void set1b(const char* name, GLboolean value);
+    void set1i(const char* name, GLint v0);
     void set1f(const char* name, GLfloat v0);
     void set1ui(const char* name, GLuint v0);
     void set2i(const char* name, GLint v0, GLint v1);

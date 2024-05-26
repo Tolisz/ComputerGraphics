@@ -103,6 +103,11 @@ void shader::set1b(const char* name, GLboolean value)
     glUniform1i(glGetUniformLocation(m_ID, name), (int)value); 
 }
 
+void shader::set1i(const char* name, GLint v0)
+{
+    glUniform1i(glGetUniformLocation(m_ID, name), v0);
+}
+
 void shader::set1f(const char* name, GLfloat v0)
 {
     glUniform1f(glGetUniformLocation(m_ID, name), v0);

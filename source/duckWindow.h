@@ -7,8 +7,10 @@
 #include "texture.h"
 #include "waterGrid.h"
 #include "light.h"
+#include "material.h"
 
 #include <vector>
+#include <map>
 
 struct ImGuiSizeCallbackData;
 
@@ -33,12 +35,19 @@ private:
     shader m_sh_testCube;
     texture m_textTexture;
 
+    // Materials
+    std::map<std::string, material> m_materials;
+
+    // Lights
+    const int m_maxLightsNum = 5;
+    glm::vec3 m_ambientColor;
+    std::vector<light> m_obj_lights;
+    shader m_sh_light;
+
+    // water
     waterGrid m_obj_water;
     shader m_sh_water;
-
-    const int m_maxLightsNum = 5;
-    std::vector<light> m_lights;
-    shader m_sh_light;
+    glm::vec3 m_waterColor;
 
     // *=*=*=*=*=*=*=*=*=*=
     //         GUI
@@ -70,6 +79,11 @@ private:
 private:
 
     void DrawLights(
+        const glm::mat4& view,
+        const glm::mat4& projection
+    );
+
+    void DrawWater(
         const glm::mat4& view,
         const glm::mat4& projection
     );
