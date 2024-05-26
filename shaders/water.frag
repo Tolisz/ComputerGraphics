@@ -2,12 +2,15 @@
 
 #define MAX_NUM_OF_LIGHTS 5
 
+// =========================================
 in FS_IN
 {
     vec3 worldPos;
+    vec2 texCoords;
 } i;
 
 layout(location = 0) out vec4 FragColor;
+// =========================================
 
 struct Light
 {
@@ -60,5 +63,5 @@ void main()
 
     vec3 intensity = Phong(i.worldPos, norm, view);
     // FragColor = vec4(intensity * objectColor, 1.0f);
-    FragColor = vec4(texture(normalTex, vec2(0.5f, 0.5f)).xyz, 1.0f);
+    FragColor = vec4(texture(normalTex, i.texCoords).xyz, 1.0f);
 }
