@@ -17,14 +17,16 @@ private:
 private: 
 
     GLuint m_gl_VAO;
-    GLuint m_gl_StartHeightBuffer;
-    GLuint m_gl_EndHeightBuffer;
+    GLuint m_gl_PreviousPosBuffer;
+    GLuint m_gl_CurrentPosBuffer;
     GLuint m_gl_EBO;
     GLuint m_gl_DampingBuffer;
+    GLuint m_gl_normalTex;
 
     GLsizei m_gl_triangleCount;
 
     shader m_sh_waterSimulation;
+    shader m_sh_computeNormals;
 
 public:
 
@@ -46,12 +48,16 @@ public:
     // *=*=*=*=*=*=*=*=*=*=
 
     void InitGL();
+    void DeInitGL();
     
+    GLuint GetNormalTex();
     void SimulateWater();
     void Draw();
 
 private:
 
     void PopulateBuffers();
+    void PrepareShaders();
+    void PrepareTextures();
 };
 

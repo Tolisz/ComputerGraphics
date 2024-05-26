@@ -15,27 +15,19 @@ waterGrid::waterGrid(int N, float a, float c)
 }
 
 waterGrid::~waterGrid()
-{
-    glDeleteVertexArrays(1, &m_gl_VAO);
-    glDeleteBuffers(1, &m_gl_StartHeightBuffer);
-    glDeleteBuffers(1, &m_gl_EndHeightBuffer);
-    glDeleteBuffers(1, &m_gl_EBO);
-}
+{}
 
 void waterGrid::InitGL()
 {
     glGenVertexArrays(1, &m_gl_VAO);
-    glGenBuffers(1, &m_gl_StartHeightBuffer);
-    glGenBuffers(1, &m_gl_EndHeightBuffer);
+    glGenBuffers(1, &m_gl_PreviousPosBuffer);
+    glGenBuffers(1, &m_gl_CurrentPosBuffer);
     glGenBuffers(1, &m_gl_EBO);
     glGenBuffers(1, &m_gl_DampingBuffer);
 
     PopulateBuffers();
-
-    m_sh_waterSimulation.Init();
-    m_sh_waterSimulation.AttachShader("shaders/waterSimulation.comp", GL_COMPUTE_SHADER);
-    m_sh_waterSimulation.Link();
-
+    PrepareShaders();
+    PrepareTextures();
 }
 
 void waterGrid::Draw()
@@ -47,14 +39,28 @@ void waterGrid::Draw()
 
 void waterGrid::SimulateWater()
 {
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_gl_StartHeightBuffer);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_gl_EndHeightBuffer);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_gl_PreviousPosBuffer);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_gl_CurrentPosBuffer);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, m_gl_DampingBuffer);
 
+    glBindImageTexture(0, m_gl_normalTex, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+
+    // Compute new height of water elements
     m_sh_waterSimulation.Use();
-    m_sh_waterSimulation.set1ui("N", m_N);
     glDispatchCompute(m_N, m_N, 1);
     glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
+
+    // For computed height update normals;
+    m_sh_computeNormals.Use();
+    glDispatchCompute(m_N, m_N, 1);
+    glMemoryBarrier(GL_TEXTURE_UPDATE_BARRIER_BIT);
+
+
+    // // swap buffers
+    // GLuint temp = m_gl_PreviousPosBuffer;
+    // m_gl_PreviousPosBuffer = m_gl_CurrentPosBuffer;
+    // m_gl_CurrentPosBuffer = temp;
+
 }
 
 void waterGrid::PopulateBuffers()
@@ -108,10 +114,10 @@ void waterGrid::PopulateBuffers()
         }
     }
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_gl_StartHeightBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, m_gl_PreviousPosBuffer);
     glBufferData(GL_ARRAY_BUFFER, points.size() * sizeof(glm::vec4), points.data(), GL_DYNAMIC_COPY);
 
-    glBindBuffer(GL_ARRAY_BUFFER, m_gl_EndHeightBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, m_gl_CurrentPosBuffer);
     glBufferData(GL_ARRAY_BUFFER, points.size() * sizeof(glm::vec4), points.data(), GL_DYNAMIC_COPY);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_gl_DampingBuffer);
@@ -121,7 +127,7 @@ void waterGrid::PopulateBuffers()
     glBufferData(GL_ARRAY_BUFFER, indices.size() * sizeof(glm::uvec3), indices.data(), GL_STATIC_DRAW);
 
     glBindVertexArray(m_gl_VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, m_gl_StartHeightBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, m_gl_CurrentPosBuffer);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_gl_EBO);
@@ -129,4 +135,50 @@ void waterGrid::PopulateBuffers()
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void waterGrid::PrepareShaders()
+{
+    m_sh_waterSimulation.Init();
+    m_sh_waterSimulation.AttachShader("shaders/waterSimulation.comp", GL_COMPUTE_SHADER);
+    m_sh_waterSimulation.Link();
+
+    m_sh_waterSimulation.Use();
+    m_sh_waterSimulation.set1ui("N", m_N);
+    m_sh_waterSimulation.set1f("dt", m_dt);
+    m_sh_waterSimulation.set1f("c", m_c);
+    m_sh_waterSimulation.set1f("h", m_h);
+
+    m_sh_computeNormals.Init();
+    m_sh_computeNormals.AttachShader("shaders/computeNormals.comp", GL_COMPUTE_SHADER);
+    m_sh_computeNormals.Link();
+
+    m_sh_computeNormals.Use();
+    m_sh_computeNormals.set1ui("N", m_N);
+}
+
+void waterGrid::PrepareTextures() 
+{
+    glGenTextures(1, &m_gl_normalTex);
+    glBindTexture(GL_TEXTURE_2D, m_gl_normalTex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, m_N, m_N, 0, GL_RGBA, GL_FLOAT, nullptr);
+}
+
+
+void waterGrid::DeInitGL()
+{
+    glDeleteVertexArrays(1, &m_gl_VAO);
+    glDeleteBuffers(1, &m_gl_PreviousPosBuffer);
+    glDeleteBuffers(1, &m_gl_CurrentPosBuffer);
+    glDeleteBuffers(1, &m_gl_DampingBuffer);
+    glDeleteBuffers(1, &m_gl_EBO);
+}
+
+GLuint waterGrid::GetNormalTex()
+{
+    return m_gl_normalTex;
 }

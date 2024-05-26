@@ -30,6 +30,8 @@ uniform Material material;
 uniform vec3 cameraPos;
 uniform vec3 objectColor;
 
+layout(binding = 0) uniform sampler2D normalTex;
+
 vec3 Phong(vec3 worldPos, vec3 norm, vec3 view)
 {
     vec3 N = normalize(norm);
@@ -57,5 +59,6 @@ void main()
     vec3 view = cameraPos - i.worldPos;
 
     vec3 intensity = Phong(i.worldPos, norm, view);
-    FragColor = vec4(intensity * objectColor, 1.0f);
+    // FragColor = vec4(intensity * objectColor, 1.0f);
+    FragColor = vec4(texture(normalTex, vec2(0.5f, 0.5f)).xyz, 1.0f);
 }

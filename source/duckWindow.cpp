@@ -171,6 +171,9 @@ void duckWindow::DrawWater(
     m_sh_water.set3fv("cameraPos", m_camera.m_worldPos);
     m_sh_water.set3fv("objectColor", m_waterColor);
 
+    glActiveTexture(GL_TEXTURE0); 
+    glBindTexture(GL_TEXTURE_2D, m_obj_water.GetNormalTex());
+    
     m_obj_water.Draw();
 }
 
@@ -182,6 +185,7 @@ void duckWindow::RunClear()
         m_obj_lights[0].DeInitGL();
     }
 
+    m_obj_water.DeInitGL();
 
 }
 
