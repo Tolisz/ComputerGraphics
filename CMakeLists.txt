@@ -10,10 +10,12 @@ add_subdirectory(externals/glm)
 add_subdirectory(externals/glfw)
 add_subdirectory(externals/glad)
 add_subdirectory(externals/imgui)
+add_subdirectory(externals/stb)
 set(DUCK_LINK_LIBS  PUBLIC glm
                     PUBLIC glfw
                     PUBLIC glad
-                    PUBLIC imgui)
+                    PUBLIC imgui
+                    PUBLIC stb)
 
 # executable
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=

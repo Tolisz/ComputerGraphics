@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+#include <stb_image.h>
+
 waterGrid::waterGrid()
     : waterGrid(256, 2.0f, 1.0f)
 { }
