@@ -34,6 +34,7 @@ uniform vec3 cameraPos;
 uniform vec3 objectColor;
 
 layout(binding = 0) uniform sampler2D normalTex;
+layout(binding = 1) uniform samplerCube cubeMap;
 
 vec3 Phong(vec3 worldPos, vec3 norm, vec3 view)
 {
@@ -56,15 +57,59 @@ vec3 Phong(vec3 worldPos, vec3 norm, vec3 view)
     return intensity;
 }
 
+float fresnel(vec3 N, vec3 V, float n1, float n2)
+{
+    float n12 = (n2 - n1) / (n2 + n1);
+    float F0 = n12 * n12;
+    float cosTheta = max(dot(N, V), 0.0f);
+    
+    return F0 + (1 - F0) * pow(1.0f - cosTheta, 5.0f);
+}
 
+vec3 intersectRay(vec3 p, vec3 d)
+{
+    vec3 one = vec3(1.0f, 1.0f, 1.0f);
+
+    vec3 t1 = (one - p) / d;
+    vec3 t2 = (-one - p) / d;
+    
+    vec3 tm = max(t1, t2);
+    float t = min(min(tm.x, tm.y), tm.z);
+    
+    return p + t * d;
+}
 
 void main()
 {   
-    vec3 norm = texture(normalTex, i.texCoords).xyz;
-    vec3 view = cameraPos - i.worldPos;
+    // Compute color of water based on reflectance and refraction
+    // ==========================================================
+    vec3 norm = normalize(texture(normalTex, i.texCoords).xyz);
+    vec3 view = normalize(cameraPos - i.worldPos);
 
-    vec3 intensity = Phong(i.worldPos, norm, view);
-    FragColor = vec4(intensity * objectColor, 1.0f);
-    // FragColor = vec4(texture(normalTex, i.texCoords).xyz, 1.0f);
-    // FragColor = vec4(texture(normalTex, i.texCoords).xyz, 1.0f);
+    float n1 = 1.0f; // air
+    float n2 = 4.0f / 3.0f; // water
+
+    bool isUnderWater = (dot(norm, view) < 0);  
+    float n = !isUnderWater ? n1 / n2 : n2 / n1;
+    if (isUnderWater) norm *= -1.0f;
+
+    // compute reflect and refract vector
+    vec3 reflectVec = reflect(-view, norm);
+    vec3 refractVec = refract(-view, norm, n);
+
+    vec3 texReflectCoord = intersectRay(i.worldPos, reflectVec);
+    vec3 texRefractCoord = intersectRay(i.worldPos, refractVec);
+    vec3 reflectColor = vec3(texture(cubeMap, texReflectCoord));
+    vec3 refractColor = vec3(texture(cubeMap, texRefractCoord));
+
+    float f = fresnel(norm, view, n1, n2);
+    vec3 color = refractVec != vec3(0.0) ? refractColor + f * reflectColor : reflectColor;
+    
+    // Compute Phong's color of water 
+    // =======================================================
+    vec3 intensity = Phong(i.worldPos, norm * (isUnderWater ? -1.0f : 1.0f), view);
+    vec3 waterColor = intensity * objectColor;
+
+    // FragColor = vec4(refractColor + waterColor * 0.1f, 1.0f);
+    FragColor = vec4(color + waterColor * 0.1f, 1.0f);
 }

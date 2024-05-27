@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <glm/trigonometric.hpp>
 #include <stb_image.h>
 
 #include <iostream>
@@ -37,18 +38,21 @@ void duckWindow::RunInit()
     // Scene
     // ======================
     
+    // camera
+    m_camera.UpdateRotation(glm::radians(-45.0f), glm::radians(-30.0f));
+
     // Lights
     m_obj_lights.reserve(m_maxLightsNum);
     m_ambientColor = glm::vec3(1.0f);
     light l; 
     l.InitGL(); 
 
-    l.m_position = glm::vec3(0.8f, 0.5f, 0.8f);
+    l.m_position = glm::vec3(0.4f, 0.5f, 0.4f);
     l.m_diffuseColor = glm::vec3(0.0f, 0.0f, 1.0f);
     l.m_specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
     m_obj_lights.push_back(l);
 
-    l.m_position = glm::vec3(-0.8f, 0.5f, -0.8f);
+    l.m_position = glm::vec3(-0.4f, 0.5f, -0.4f);
     l.m_diffuseColor = glm::vec3(0.0f, 1.0f, 0.0f);
     l.m_specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
     m_obj_lights.push_back(l);
@@ -68,7 +72,7 @@ void duckWindow::RunInit()
 
     // Water
     m_obj_water.InitGL();
-    m_waterColor = glm::vec3(0.5f, 1.0f, 0.8f);
+    m_waterColor = glm::vec3(0.0288, 0.960, 0.882);
 
     m_sh_water.Init();
     m_sh_water.AttachShader("shaders/water.vert", GL_VERTEX_SHADER);
@@ -227,6 +231,8 @@ void duckWindow::DrawWater(
 
     glActiveTexture(GL_TEXTURE0); 
     glBindTexture(GL_TEXTURE_2D, m_obj_water.GetNormalTex());
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_gl_cubeMap);
 
     m_obj_water.Draw();
 }
@@ -243,7 +249,9 @@ void duckWindow::DrawSkyBox(
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_gl_cubeMap);
 
+    glEnable(GL_CULL_FACE);
     m_obj_skyBox.Draw();
+    glDisable(GL_CULL_FACE);
 }
 
 void duckWindow::DisturbWater()
@@ -293,7 +301,7 @@ void duckWindow::RenderGUI()
     GenGUI_AppStatistics();
     GenGUI_Light();
     GenGUI_Materials();
-    ImGui::ShowDemoWindow();
+    //ImGui::ShowDemoWindow();
     ImGui::End();
 
     // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
