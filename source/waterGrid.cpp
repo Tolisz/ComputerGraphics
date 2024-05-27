@@ -111,7 +111,7 @@ void waterGrid::PopulateBuffers()
             glm::vec2 t2 = glm::abs(-border - pos);
             glm::vec2 t = glm::min(t1, t2);
             float l = glm::min(t.x, t.y);
-            dampings.push_back(0.95 * glm::min(1.0f, l / 0.2f));
+            dampings.push_back(0.95 /* * glm::min(1.0f, l / 0.2f) */);
         }
     }
 

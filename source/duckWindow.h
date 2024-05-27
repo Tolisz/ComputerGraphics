@@ -51,7 +51,7 @@ private:
     glm::vec3 m_waterColor;
 
     float m_dropProbability = 0.03f;
-    float m_maxDropDepth = -0.1f;
+    float m_maxDropDepth = -0.05f;
     float m_dropDepthTime = 0.05f; // in seconds
 
     bool m_bDrop = false;
@@ -62,6 +62,9 @@ private:
     std::random_device m_rd;
     std::mt19937 m_gen;
     std::uniform_real_distribution<float> m_uniformZeroToOne;
+
+    // Cube
+    GLuint m_gl_cubeMap;
 
     // *=*=*=*=*=*=*=*=*=*=
     //         GUI
