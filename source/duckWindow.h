@@ -48,7 +48,7 @@ private:
     glm::vec3 m_waterColor;
 
     float m_dropProbability = 0.03f;
-    float m_maxDropDepth = -1.05f;
+    float m_maxDropDepth = -0.10f;
     float m_dropDepthTime = 0.05f; // in seconds
 
     bool m_bDrop = false;
