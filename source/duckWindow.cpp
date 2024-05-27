@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <stb_image.h>
 
 #include <iostream>
 #include <cmath>
@@ -82,6 +83,17 @@ void duckWindow::RunInit()
     m_sh_skyBox.AttachShader("shaders/skyBox.frag", GL_FRAGMENT_SHADER);
     m_sh_skyBox.Link();
 
+    std::vector<std::string> defaultSkyBox = {
+        "resources/textures/CM_skybox/right.jpg",
+        "resources/textures/CM_skybox/left.jpg",
+        "resources/textures/CM_skybox/top.jpg",
+        "resources/textures/CM_skybox/bottom.jpg",
+        "resources/textures/CM_skybox/front.jpg",
+        "resources/textures/CM_skybox/back.jpg"
+    }; 
+
+    PrepareCubeMapTexture(defaultSkyBox);
+
     // OpenGL initial configuration
     // ============================
 
@@ -91,6 +103,30 @@ void duckWindow::RunInit()
     glEnable(GL_BLEND);
     glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+}
+
+void duckWindow::PrepareCubeMapTexture(std::vector<std::string> files)
+{
+    glGenTextures(1, &m_gl_cubeMap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_gl_cubeMap);
+    
+    int width, height, nrChannels;
+    for (unsigned int i = 0; i < files.size() && i < 6; i++) {
+        unsigned char *pixels = stbi_load(files[i].c_str(), &width, &height, &nrChannels, 0);
+        if (pixels) {
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+        } 
+        else {
+            std::cout << "Cube map read error: \n\t[file]:" << files[i] << std::endl;
+        }
+        stbi_image_free(pixels);
+    }
+    
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);  
 }
 
 void duckWindow::RunRenderTick()
@@ -194,6 +230,9 @@ void duckWindow::DrawSkyBox(
     m_sh_skyBox.Use();
     m_sh_skyBox.setM4fv("view", GL_FALSE, view);
     m_sh_skyBox.setM4fv("projection", GL_FALSE, projection);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_gl_cubeMap);
 
     m_obj_skyBox.Draw();
 }

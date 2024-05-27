@@ -63,8 +63,7 @@ private:
     // skyBox
     skyBox m_obj_skyBox;
     shader m_sh_skyBox;
-
-    //GLuint m_gl_cubeMap;
+    GLuint m_gl_cubeMap;
 
     // *=*=*=*=*=*=*=*=*=*=
     //         GUI
@@ -94,6 +93,16 @@ private:
     virtual void RunInit() override;
     virtual void RunRenderTick() override;
     virtual void RunClear() override;
+
+private:
+
+    // 0 - GL_TEXTURE_CUBE_MAP_POSITIVE_X - right
+    // 1 - GL_TEXTURE_CUBE_MAP_NEGATIVE_X - left 
+    // 2 - GL_TEXTURE_CUBE_MAP_POSITIVE_Y - top
+    // 3 - GL_TEXTURE_CUBE_MAP_NEGATIVE_Y - bottom
+    // 4 - GL_TEXTURE_CUBE_MAP_POSITIVE_Z - front
+    // 5 - GL_TEXTURE_CUBE_MAP_NEGATIVE_Z - back
+    void PrepareCubeMapTexture(std::vector<std::string> files);
 
 private:
 

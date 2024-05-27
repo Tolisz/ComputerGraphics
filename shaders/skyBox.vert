@@ -1,11 +1,19 @@
 #version 460 core
 
+// =========================================
 layout(location = 0) in vec3 iPos;
+
+out FS_IN
+{
+    vec3 texCoords;
+} o;
+// =========================================
 
 uniform mat4 view;
 uniform mat4 projection;
 
 void main()
 {
+    o.texCoords = iPos;
     gl_Position = projection * view * vec4(iPos, 1.0f);    
 }
