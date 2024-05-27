@@ -83,16 +83,25 @@ void duckWindow::RunInit()
     m_sh_skyBox.AttachShader("shaders/skyBox.frag", GL_FRAGMENT_SHADER);
     m_sh_skyBox.Link();
 
-    std::vector<std::string> defaultSkyBox = {
-        "resources/textures/CM_skybox/right.jpg",
-        "resources/textures/CM_skybox/left.jpg",
-        "resources/textures/CM_skybox/top.jpg",
-        "resources/textures/CM_skybox/bottom.jpg",
-        "resources/textures/CM_skybox/front.jpg",
-        "resources/textures/CM_skybox/back.jpg"
+    // std::vector<std::string> defaultSkyBox = {
+    //     "resources/textures/CM_skybox/right.jpg",
+    //     "resources/textures/CM_skybox/left.jpg",
+    //     "resources/textures/CM_skybox/top.jpg",
+    //     "resources/textures/CM_skybox/bottom.jpg",
+    //     "resources/textures/CM_skybox/front.jpg",
+    //     "resources/textures/CM_skybox/back.jpg"
+    // }; 
+
+    std::vector<std::string> cadcam = {
+        "resources/textures/CM_310/px.png",
+        "resources/textures/CM_310/nx.png",
+        "resources/textures/CM_310/py.png",
+        "resources/textures/CM_310/ny.png",
+        "resources/textures/CM_310/pz.png",
+        "resources/textures/CM_310/nz.png"
     }; 
 
-    PrepareCubeMapTexture(defaultSkyBox);
+    PrepareCubeMapTexture(cadcam);
 
     // OpenGL initial configuration
     // ============================
