@@ -65,15 +65,6 @@ void duckWindow::RunInit()
     m.shininess = 128.0f;
     m_materials.insert(std::make_pair("water", m));
 
-    // water
-
-    // m_testCube.Init();
-
-    // m_sh_testCube.Init();
-    // m_sh_testCube.AttachShader("shaders/test.vert", GL_VERTEX_SHADER);
-    // m_sh_testCube.AttachShader("shaders/test.frag", GL_FRAGMENT_SHADER);
-    // m_sh_testCube.Link();
-
     // Water
     m_obj_water.InitGL();
     m_waterColor = glm::vec3(0.5f, 1.0f, 0.8f);
@@ -83,9 +74,13 @@ void duckWindow::RunInit()
     m_sh_water.AttachShader("shaders/water.frag", GL_FRAGMENT_SHADER);
     m_sh_water.Link();
 
-    //m_textTexture = texture::CreateTexture2D(GL_REPEAT, GL_REPEAT, GL_LINEAR, GL_LINEAR);
-
-
+    // skyBox
+    m_obj_skyBox.InitGL();
+    
+    m_sh_skyBox.Init();
+    m_sh_skyBox.AttachShader("shaders/skyBox.vert", GL_VERTEX_SHADER);
+    m_sh_skyBox.AttachShader("shaders/skyBox.frag", GL_FRAGMENT_SHADER);
+    m_sh_skyBox.Link();
 
     // OpenGL initial configuration
     // ============================
@@ -121,6 +116,7 @@ void duckWindow::RunRenderTick()
     // m_testCube.Draw();
 
     DrawWater(view, projection);
+    DrawSkyBox(view, projection);
     DrawLights(view, projection);
 
     RenderGUI();
@@ -188,6 +184,18 @@ void duckWindow::DrawWater(
     glBindTexture(GL_TEXTURE_2D, m_obj_water.GetNormalTex());
 
     m_obj_water.Draw();
+}
+
+void duckWindow::DrawSkyBox(
+    const glm::mat4& view,
+    const glm::mat4& projection
+)
+{
+    m_sh_skyBox.Use();
+    m_sh_skyBox.setM4fv("view", GL_FALSE, view);
+    m_sh_skyBox.setM4fv("projection", GL_FALSE, projection);
+
+    m_obj_skyBox.Draw();
 }
 
 void duckWindow::DisturbWater()

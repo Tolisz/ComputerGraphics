@@ -8,6 +8,7 @@
 #include "waterGrid.h"
 #include "light.h"
 #include "material.h"
+#include "skyBox.h"
 
 #include <vector>
 #include <map>
@@ -19,6 +20,7 @@ class duckWindow: public glfwWindowWrap
 {
 private:
 
+    // Window
     enum class wState
     {
         DEFALUT, 
@@ -26,15 +28,10 @@ private:
         CAMERA_MOVE,
         CAMERA_ROTATE,
     };
-
     wState m_windowState;
 
     camera m_camera;
     glm::vec2 m_mouse_prevPos;
-
-    cube m_testCube;
-    shader m_sh_testCube;
-    texture m_textTexture;
 
     // Materials
     std::map<std::string, material> m_materials;
@@ -63,8 +60,11 @@ private:
     std::mt19937 m_gen;
     std::uniform_real_distribution<float> m_uniformZeroToOne;
 
-    // Cube
-    GLuint m_gl_cubeMap;
+    // skyBox
+    skyBox m_obj_skyBox;
+    shader m_sh_skyBox;
+
+    //GLuint m_gl_cubeMap;
 
     // *=*=*=*=*=*=*=*=*=*=
     //         GUI
@@ -107,6 +107,11 @@ private:
         const glm::mat4& projection
     );
     void DisturbWater();
+
+    void DrawSkyBox(
+        const glm::mat4& view,
+        const glm::mat4& projection
+    );
 
 private: 
 
