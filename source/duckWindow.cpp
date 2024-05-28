@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include "glm/gtc/matrix_transform.hpp"
 #include <glm/trigonometric.hpp>
 #include <stb_image.h>
 
@@ -107,6 +108,14 @@ void duckWindow::RunInit()
 
     PrepareCubeMapTexture(cadcam);
 
+    // duck 
+    m_obj_duck.InitGLFromFile("resources/meshes/duck/duck.txt");
+    
+    m_sh_duck.Init();
+    m_sh_duck.AttachShader("shaders/duck.vert", GL_VERTEX_SHADER);
+    m_sh_duck.AttachShader("shaders/duck.frag", GL_FRAGMENT_SHADER);
+    m_sh_duck.Link();
+
     // OpenGL initial configuration
     // ============================
 
@@ -166,6 +175,7 @@ void duckWindow::RunRenderTick()
 
     DrawWater(view, projection);
     DrawSkyBox(view, projection);
+    DrawDuck(view, projection);
     DrawLights(view, projection);
 
     RenderGUI();
@@ -252,6 +262,19 @@ void duckWindow::DrawSkyBox(
     glEnable(GL_CULL_FACE);
     m_obj_skyBox.Draw();
     glDisable(GL_CULL_FACE);
+}
+
+void duckWindow::DrawDuck(
+    const glm::mat4& view,
+    const glm::mat4& projection
+)
+{
+    m_sh_duck.Use();
+    m_sh_duck.setM4fv("model", GL_FALSE, glm::scale(glm::mat4x4(1.0f), glm::vec3(0.001f)));
+    m_sh_duck.setM4fv("view", GL_FALSE, view);
+    m_sh_duck.setM4fv("projection", GL_FALSE, projection);
+
+    m_obj_duck.Draw();
 }
 
 void duckWindow::DisturbWater()

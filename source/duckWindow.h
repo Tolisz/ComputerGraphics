@@ -7,6 +7,7 @@
 #include "light.h"
 #include "material.h"
 #include "skyBox.h"
+#include "duck.h"
 
 #include <vector>
 #include <map>
@@ -63,6 +64,10 @@ private:
     shader m_sh_skyBox;
     GLuint m_gl_cubeMap;
 
+    // duck
+    duck m_obj_duck;
+    shader m_sh_duck;
+
     // *=*=*=*=*=*=*=*=*=*=
     //         GUI
     // *=*=*=*=*=*=*=*=*=*=
@@ -116,6 +121,11 @@ private:
     void DisturbWater();
 
     void DrawSkyBox(
+        const glm::mat4& view,
+        const glm::mat4& projection
+    );
+
+    void DrawDuck(
         const glm::mat4& view,
         const glm::mat4& projection
     );

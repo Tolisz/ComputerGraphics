@@ -7,10 +7,12 @@ class duck
 {
 private:
     GLuint m_gl_VAO;
-    GLuint m_gl_VBO;
+    GLuint m_gl_VerticesBO;
+    GLuint m_gl_NormalsBO;
+    GLuint m_gl_TextCoordsBO;
     GLuint m_gl_EBO;
 
-    
+    GLsizei m_gl_indicesNum;
 
 public:
     // *=*=*=*=*=*=*=*=*=*=
