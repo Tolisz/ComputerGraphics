@@ -2,9 +2,7 @@
 
 #include "glfwWindowWrap.h"
 #include "camera.h"
-#include "cube.h"
 #include "shader.h"
-#include "texture.h"
 #include "waterGrid.h"
 #include "light.h"
 #include "material.h"
