@@ -3,14 +3,19 @@
 // =========================================
 in FS_IN
 {
+    vec3 norm;
     vec2 texCoords;
 } i;
 
 layout(location = 0) out vec4 FragColor;
 // =========================================
 
+layout(binding = 0) uniform sampler2D duckTex; 
 
 void main()
 {
-    FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    //FragColor = vec4(i.norm, 1.0f);
+    vec3 duckColor = texture(duckTex, i.texCoords).xyz;
+
+    FragColor = vec4(duckColor, 1.0f);
 }

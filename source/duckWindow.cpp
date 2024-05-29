@@ -116,6 +116,8 @@ void duckWindow::RunInit()
     m_sh_duck.AttachShader("shaders/duck.frag", GL_FRAGMENT_SHADER);
     m_sh_duck.Link();
 
+    PrepareDuckTexture("resources/meshes/duck/ducktex.jpg");
+
     // OpenGL initial configuration
     // ============================
 
@@ -149,6 +151,31 @@ void duckWindow::PrepareCubeMapTexture(std::vector<std::string> files)
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);  
+}
+
+void duckWindow::PrepareDuckTexture(std::string path)
+{
+    glGenTextures(1, &m_gl_duckTex);
+    glBindTexture(GL_TEXTURE_2D, m_gl_duckTex);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    
+    //stbi_set_flip_vertically_on_load(true);
+
+    int width, height, nrChannels;
+    unsigned char *pixels = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+    if (pixels) {
+        std::cout << width << ", " << height << ", " << std::endl;
+        std::cout << nrChannels << std::endl;
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    } 
+    else {
+        std::cout << "Duck texture read error: \n\t[file]:" << path << std::endl;
+    }
+    stbi_image_free(pixels);
 }
 
 void duckWindow::RunRenderTick()
@@ -274,6 +301,9 @@ void duckWindow::DrawDuck(
     m_sh_duck.setM4fv("view", GL_FALSE, view);
     m_sh_duck.setM4fv("projection", GL_FALSE, projection);
 
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_gl_duckTex);
+    
     m_obj_duck.Draw();
 }
 
@@ -306,7 +336,8 @@ void duckWindow::RunClear()
     }
 
     m_obj_water.DeInitGL();
-
+    m_obj_skyBox.DeInitGL();
+    m_obj_duck.DeInitGL();
 }
 
 void duckWindow::RenderGUI()

@@ -67,6 +67,9 @@ private:
     // duck
     duck m_obj_duck;
     shader m_sh_duck;
+    GLuint m_gl_duckTex;
+
+    
 
     // *=*=*=*=*=*=*=*=*=*=
     //         GUI
@@ -106,7 +109,7 @@ private:
     // 4 - GL_TEXTURE_CUBE_MAP_POSITIVE_Z - front
     // 5 - GL_TEXTURE_CUBE_MAP_NEGATIVE_Z - back
     void PrepareCubeMapTexture(std::vector<std::string> files);
-
+    void PrepareDuckTexture(std::string path);
 private:
 
     void DrawLights(

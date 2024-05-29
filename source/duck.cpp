@@ -77,7 +77,7 @@ void duck::InitGLFromFile(std::string duckFile)
     glEnableVertexAttribArray(1);
 
     glBindBuffer(GL_ARRAY_BUFFER, m_gl_TextCoordsBO);
-    glBufferData(GL_ARRAY_BUFFER, V * sizeof(glm::vec2), normals.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, V * sizeof(glm::vec2), texCoords.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GL_FLOAT), (void*)0);
     glEnableVertexAttribArray(2);
 
