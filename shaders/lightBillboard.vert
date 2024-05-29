@@ -3,15 +3,22 @@
 /* Uncomment it if you want to test how fragment shader works */
 //#define TEST_FRAGMENT_SHADER
 
+// =========================================
 layout(location = 0) in vec3 iSquarePos;
 
 out VS_OUT
 {
     vec2 SquarePos;
-} vs_out;
+} o;
+// =========================================
 
-uniform mat4 view;
-uniform mat4 projection;
+layout(std140, binding = 0) uniform MatricesBlock {
+    mat4 view;
+    mat4 projection;
+};
+
+//uniform mat4 view;
+//uniform mat4 projection;
 
 uniform vec3 billboardPos;  /* billboard's world position. */
 uniform ivec2 screenSize;   /* screen size in pixels */
@@ -34,5 +41,5 @@ void main()
     gl_Position = projBillboardPos;
 
     // Interpolate squarePos for fragment shader computations
-    vs_out.SquarePos = iSquarePos.xy;
+    o.SquarePos = iSquarePos.xy;
 }

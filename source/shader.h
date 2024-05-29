@@ -46,6 +46,9 @@ public:
     void set3fv(const char* name, const glm::vec3& value);
     void setM4fv(const char* name, GLboolean transpose, const glm::mat4& matrix);
 
+    GLuint GetUniformBlockIndex(const char* uniformBlockName) const;
+    void BindUniformBlockToBindingPoint(const char* uniformBlockName, const GLuint bindingPoint) const;
+    
 private:
 
     std::string ReadShaderCode(const std::string& codeFilePath);

@@ -137,3 +137,22 @@ void shader::setM4fv(const char* name, GLboolean transpose, const glm::mat4& mat
 {
     glUniformMatrix4fv(glGetUniformLocation(m_ID, name), 1, transpose, (float*)&matrix);
 }
+
+GLuint shader::GetUniformBlockIndex(const char* uniformBlockName) const
+{
+    GLuint result = glGetUniformBlockIndex(m_ID, uniformBlockName);
+    if (result == GL_INVALID_INDEX) {
+        std::cout << "Could not get index of uniform block [" << uniformBlockName << "], check if suck uniform block really exists" << std::endl;  
+    }
+
+    return result;
+}
+
+void shader::BindUniformBlockToBindingPoint(const char* uniformBlockName, const GLuint bindingPoint) const
+{
+    const GLuint blockIndex = GetUniformBlockIndex(uniformBlockName);
+    if (blockIndex != GL_INVALID_INDEX) {
+        glUniformBlockBinding(m_ID, blockIndex, bindingPoint);
+    } 
+}
+

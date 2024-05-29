@@ -121,6 +121,14 @@ void duckWindow::RunInit()
     // OpenGL initial configuration
     // ============================
 
+    m_UBO_viewProjection.CreateUBO(2 * sizeof(glm::mat4));
+    m_UBO_viewProjection.BindBufferBaseToBindingPoint(0);
+
+    m_sh_water.BindUniformBlockToBindingPoint("MatricesBlock", 0);
+    m_sh_skyBox.BindUniformBlockToBindingPoint("MatricesBlock", 0);
+    m_sh_duck.BindUniformBlockToBindingPoint("MatricesBlock", 0);
+    m_sh_light.BindUniformBlockToBindingPoint("MatricesBlock", 0);
+
     glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
 
@@ -162,13 +170,9 @@ void duckWindow::PrepareDuckTexture(std::string path)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     
-    //stbi_set_flip_vertically_on_load(true);
-
     int width, height, nrChannels;
     unsigned char *pixels = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
     if (pixels) {
-        std::cout << width << ", " << height << ", " << std::endl;
-        std::cout << nrChannels << std::endl;
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixels);
         glGenerateMipmap(GL_TEXTURE_2D);
     } 
@@ -193,29 +197,21 @@ void duckWindow::RunRenderTick()
 
     glm::mat4 view = m_camera.GetViewMatrix();
     glm::mat4 projection = m_camera.GetProjectionMatrix(aspect);
+    glm::mat4 viewProj[2] = {view, projection};
 
-    // m_sh_testCube.Use();
-    // m_sh_testCube.setM4fv("model", GL_FALSE, glm::mat4(1.0f));
-    // m_sh_testCube.setM4fv("view", GL_FALSE, view);
-    // m_sh_testCube.setM4fv("projection", GL_FALSE, projection);
-    // m_testCube.Draw();
+    m_UBO_viewProjection.SetBufferData(0, viewProj, 2 * sizeof(glm::mat4));
 
-    DrawWater(view, projection);
-    DrawSkyBox(view, projection);
-    DrawDuck(view, projection);
-    DrawLights(view, projection);
+    DrawWater();
+    DrawSkyBox();
+    DrawDuck();
+    DrawLights();
 
     RenderGUI();
 }
 
-void duckWindow::DrawLights(
-    const glm::mat4& view,
-    const glm::mat4& projection
-)
+void duckWindow::DrawLights()
 {
     m_sh_light.Use();
-    m_sh_light.setM4fv("view", GL_FALSE, view);
-    m_sh_light.setM4fv("projection", GL_FALSE, projection);
     m_sh_light.set2i("screenSize", m_width, m_height);
 
     for (int i = 0; i < m_obj_lights.size(); i++) { 
@@ -227,10 +223,7 @@ void duckWindow::DrawLights(
     }
 }
 
-void duckWindow::DrawWater(
-    const glm::mat4& view,
-    const glm::mat4& projection
-)
+void duckWindow::DrawWater()
 {   
     // Distribute and simulate water
     // =============================
@@ -240,9 +233,6 @@ void duckWindow::DrawWater(
     // Draw water
     // =============================
     m_sh_water.Use();
-    //m_sh_water.setM4fv("model", GL_FALSE, glm::mat4(1.0f));
-    m_sh_water.setM4fv("view", GL_FALSE, view);
-    m_sh_water.setM4fv("projection", GL_FALSE, projection);
     
     m_sh_water.set1i("numberOfLights", m_obj_lights.size());
     m_sh_water.set3fv("ambientColor", m_ambientColor);
@@ -274,14 +264,9 @@ void duckWindow::DrawWater(
     m_obj_water.Draw();
 }
 
-void duckWindow::DrawSkyBox(
-    const glm::mat4& view,
-    const glm::mat4& projection
-)
+void duckWindow::DrawSkyBox()
 {
     m_sh_skyBox.Use();
-    m_sh_skyBox.setM4fv("view", GL_FALSE, view);
-    m_sh_skyBox.setM4fv("projection", GL_FALSE, projection);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_gl_cubeMap);
@@ -291,15 +276,10 @@ void duckWindow::DrawSkyBox(
     glDisable(GL_CULL_FACE);
 }
 
-void duckWindow::DrawDuck(
-    const glm::mat4& view,
-    const glm::mat4& projection
-)
+void duckWindow::DrawDuck()
 {
     m_sh_duck.Use();
     m_sh_duck.setM4fv("model", GL_FALSE, glm::scale(glm::mat4x4(1.0f), glm::vec3(0.001f)));
-    m_sh_duck.setM4fv("view", GL_FALSE, view);
-    m_sh_duck.setM4fv("projection", GL_FALSE, projection);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_gl_duckTex);

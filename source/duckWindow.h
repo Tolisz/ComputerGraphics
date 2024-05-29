@@ -8,6 +8,7 @@
 #include "material.h"
 #include "skyBox.h"
 #include "duck.h"
+#include "uniformBufferObject.h"
 
 #include <vector>
 #include <map>
@@ -67,9 +68,10 @@ private:
     // duck
     duck m_obj_duck;
     shader m_sh_duck;
-    GLuint m_gl_duckTex;
+    GLuint m_gl_duckTex;    
 
-    
+    // UBOs
+    uniformBufferObject m_UBO_viewProjection;
 
     // *=*=*=*=*=*=*=*=*=*=
     //         GUI
@@ -112,26 +114,12 @@ private:
     void PrepareDuckTexture(std::string path);
 private:
 
-    void DrawLights(
-        const glm::mat4& view,
-        const glm::mat4& projection
-    );
+    void DrawLights();
 
-    void DrawWater(
-        const glm::mat4& view,
-        const glm::mat4& projection
-    );
+    void DrawWater();
     void DisturbWater();
-
-    void DrawSkyBox(
-        const glm::mat4& view,
-        const glm::mat4& projection
-    );
-
-    void DrawDuck(
-        const glm::mat4& view,
-        const glm::mat4& projection
-    );
+    void DrawSkyBox();
+    void DrawDuck();
 
 private: 
 

@@ -10,8 +10,10 @@ out FS_IN
 } o;
 // ==================================
 
-uniform mat4 view;
-uniform mat4 projection;
+layout(std140, binding = 0) uniform MatricesBlock {
+    mat4 view;
+    mat4 projection;
+};
 
 uniform float a;
 

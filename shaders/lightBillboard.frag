@@ -2,12 +2,14 @@
 
 #define M_PI 3.1415926535897932384626433832795
 
+// ==================================
 in VS_OUT
 {
     vec2 SquarePos; /* All interpolated values are inside the square [-1, 1] x [-1, 1] */
-} fs_in;
+} i;
 
 layout(location = 0) out vec4 FragColor;
+// ==================================
 
 uniform vec3 colorDiffuse;  /* Color of the inner and outer circles */
 uniform vec3 colorSpecular; /* Color of the dot inside the billboard */
@@ -47,7 +49,7 @@ vec4 lightColorer()
     vec4 spec = vec4(colorSpecular, 1.0f);
     vec4 diffInner = vec4(colorDiffuse, 1.0f);
     vec4 diffOuter = vec4(colorDiffuse, 1.0f);
-    float l = length(fs_in.SquarePos);
+    float l = length(i.SquarePos);
 
     // central point color
     float ts = 1 - smoothstep(0, c_r, l);
@@ -59,7 +61,7 @@ vec4 lightColorer()
     // delta alpha - angle of one segment. 
     float da = (2.0f * M_PI) / c_N;  
     // alpha - angle from Up Y axis to Right X axis of a fragment
-    float a = atan(-fs_in.SquarePos.x, -fs_in.SquarePos.y); 
+    float a = atan(-i.SquarePos.x, -i.SquarePos.y); 
     a += M_PI;  // from [-PI, +PI] to [0, 2 * PI]
     a = mod(a + da / 2, 2 * M_PI); // Rotate da/2 left
 
