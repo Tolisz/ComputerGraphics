@@ -44,18 +44,18 @@ void duckWindow::RunInit()
 
     // Lights
     m_obj_lights.reserve(m_maxLightsNum);
-    m_ambientColor = glm::vec3(1.0f);
+    m_ambientColor = glm::vec4(1.0f);
     light l; 
     l.InitGL(); 
 
-    l.m_position = glm::vec3(0.4f, 0.5f, 0.4f);
-    l.m_diffuseColor = glm::vec3(0.0f, 0.0f, 1.0f);
-    l.m_specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    l.m_position = glm::vec4(0.4f, 0.5f, 0.4f, 1.0f);
+    l.m_diffuseColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+    l.m_specularColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     m_obj_lights.push_back(l);
 
-    l.m_position = glm::vec3(-0.4f, 0.5f, -0.4f);
-    l.m_diffuseColor = glm::vec3(0.0f, 1.0f, 0.0f);
-    l.m_specularColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    l.m_position = glm::vec4(-0.4f, 0.5f, -0.4f, 1.0f);
+    l.m_diffuseColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    l.m_specularColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     m_obj_lights.push_back(l);
 
     m_sh_light.Init();
@@ -128,6 +128,8 @@ void duckWindow::RunInit()
     m_sh_skyBox.BindUniformBlockToBindingPoint("MatricesBlock", 0);
     m_sh_duck.BindUniformBlockToBindingPoint("MatricesBlock", 0);
     m_sh_light.BindUniformBlockToBindingPoint("MatricesBlock", 0);
+
+    
 
     glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);

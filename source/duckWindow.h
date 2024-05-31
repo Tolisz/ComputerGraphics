@@ -38,7 +38,7 @@ private:
 
     // Lights
     const int m_maxLightsNum = 5;
-    glm::vec3 m_ambientColor;
+    glm::vec4 m_ambientColor;
     std::vector<light> m_obj_lights;
     shader m_sh_light;
 

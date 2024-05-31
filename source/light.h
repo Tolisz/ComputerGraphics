@@ -10,9 +10,9 @@ public:
     //   Light parameters
     // *=*=*=*=*=*=*=*=*=*=
 
-    glm::vec3 m_position;
-    glm::vec3 m_diffuseColor;
-    glm::vec3 m_specularColor;
+    glm::vec4 m_position;
+    glm::vec4 m_diffuseColor;
+    glm::vec4 m_specularColor;
 
 private:
     // *=*=*=*=*=*=*=*=*=*=
