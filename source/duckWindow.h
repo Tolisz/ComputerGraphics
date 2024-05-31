@@ -49,7 +49,7 @@ private:
     glm::vec3 m_waterColor;
 
     float m_dropProbability = 0.03f;
-    float m_maxDropDepth = -0.10f;
+    float m_dropMapDepth = -0.10f;
     float m_dropDepthTime = 0.05f; // in seconds
 
     bool m_bDrop = false;
@@ -76,6 +76,7 @@ private:
     glm::vec3 m_duckViewDir;
     float m_duckTime = 0.0f;
     float m_duckSpeed = 0.1f;
+    float m_duckMaxDepth = -0.20f;
 
     // Anisotropic light
     struct LightFunctionSubroutines {
@@ -137,10 +138,10 @@ private:
 
     void UpdateUBOs();
     void UpdateDuckPosition();
+    void DisturbWater();
 
     void DrawLights();
     void DrawWater();
-    void DisturbWater();
     void DrawSkyBox();
     void DrawDuck();
 
