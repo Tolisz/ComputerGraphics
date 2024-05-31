@@ -463,6 +463,7 @@ void duckWindow::GenGUI_Materials()
     {   
         int i = 0;
         for (auto& [key, value] : m_materials) {
+            ImGui::PushID(i);
             ImGui::SeparatorText(key.c_str());
             if (ImGui::BeginTable("split", 3)) 
             {
@@ -475,7 +476,7 @@ void duckWindow::GenGUI_Materials()
                 ImGui::EndTable();
             }
             ImGui::DragFloat("shinness", &value.shininess, 1.0f);
-            
+            ImGui::PopID();
             i++;
         }
     }
