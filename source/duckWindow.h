@@ -9,6 +9,7 @@
 #include "skyBox.h"
 #include "duck.h"
 #include "uniformBufferObject.h"
+#include "BSplineRandomizer.h"
 
 #include <vector>
 #include <map>
@@ -70,6 +71,12 @@ private:
     shader m_sh_duck;
     GLuint m_gl_duckTex;
 
+    BSplineRandomizer m_BSpline;
+    glm::vec3 m_duckPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+    float m_duckTime = 0.0f;
+    float m_duckSpeed = 0.5f;
+
+    // Anisotropic light
     struct LightFunctionSubroutines {
         GLuint Phong;
         GLuint PhongAnisotropic;
@@ -94,7 +101,8 @@ private:
 
     std::string m_gui_renderer;
 
-    bool m_gui_anisotropicDuck = false;
+    bool m_gui_bAnisotropicDuck = false;
+    bool m_gui_bDrawCurve = false;
 
 public:
     // *=*=*=*=*=*=*=*=*=*=
@@ -126,8 +134,10 @@ private:
     void PrepareDuckTexture(std::string path);
 private:
 
-    void DrawLights();
+    void UpdateUBOs();
+    void UpdateDuckPosition();
 
+    void DrawLights();
     void DrawWater();
     void DisturbWater();
     void DrawSkyBox();
@@ -139,7 +149,7 @@ private:
     void GenGUI_AppStatistics();
     void GenGUI_Light();
     void GenGUI_Materials();
-    void GenGUI_AnisotropicLight();
+    void GenGUI_Duck();
     static void InfoWindowSizeCallback(ImGuiSizeCallbackData* data);
 
 private: 

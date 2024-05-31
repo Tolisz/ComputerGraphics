@@ -12,7 +12,16 @@
 
 duckWindow::duckWindow()
     : m_gen(m_rd()), 
-      m_uniformZeroToOne(0.0f, 1.0f)
+      m_uniformZeroToOne(0.0f, 1.0f),
+
+      m_BSpline(
+        {0.0f, 0.0f, 0.0f},
+        {-0.5f, 0.0f, 0.0f},
+        {-0.5f, 0.0f, -0.5f},
+        {0.0f, 0.0f, -0.5f},
+        {-1.0f, 0.0f, -1.0f},
+        {1.0f, 0.0f, 1.0f}
+      )
 {}
 
 duckWindow::~duckWindow()
@@ -156,9 +165,11 @@ void duckWindow::RunInit()
     // Bind Textures
     glActiveTexture(GL_TEXTURE0); 
     glBindTexture(GL_TEXTURE_2D, m_obj_water.GetNormalTex());
+    
+    glActiveTexture(GL_TEXTURE1); 
     glBindTexture(GL_TEXTURE_CUBE_MAP, m_gl_cubeMap);
 
-    glActiveTexture(GL_TEXTURE1);
+    glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, m_gl_duckTex);
 
     // Set Clear colors and blending
@@ -226,6 +237,19 @@ void duckWindow::RunRenderTick()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    UpdateUBOs();
+    UpdateDuckPosition();
+
+    DrawWater();
+    DrawSkyBox();
+    DrawDuck();
+    DrawLights();
+
+    RenderGUI();
+}
+
+void duckWindow::UpdateUBOs()
+{
     float aspect = static_cast<float>(m_width)/m_height;
 
     glm::mat4 view = m_camera.GetViewMatrix();
@@ -238,13 +262,16 @@ void duckWindow::RunRenderTick()
     m_UBO_lights.BindUBO();
     m_UBO_lights.SetBufferData(0, &m_ambientColor, sizeof(glm::vec4));
     m_UBO_lights.SetBufferData(sizeof(glm::vec4), m_obj_lights.data(), 3 * sizeof(glm::vec4) * m_obj_lights.size());
+}
 
-    DrawWater();
-    DrawSkyBox();
-    DrawDuck();
-    DrawLights();
-
-    RenderGUI();
+void duckWindow::UpdateDuckPosition()
+{
+    m_duckPosition = m_BSpline.GetCurvePosition(m_duckTime);
+    m_duckTime += m_deltaTime * m_duckSpeed;
+    if (m_duckTime >= 1.0f) {
+        m_duckTime = 0.0f;
+        m_BSpline.GenerateSubsequentCurve();
+    }
 }
 
 void duckWindow::DrawLights()
@@ -295,10 +322,15 @@ void duckWindow::DrawSkyBox()
 
 void duckWindow::DrawDuck()
 {
-    m_sh_duck.Use();
-    m_sh_duck.setM4fv("model", GL_FALSE, glm::scale(glm::mat4x4(1.0f), glm::vec3(0.001f)));
+    glm::mat4 scale(1.0f), translation(1.0f);
+    translation = glm::translate(translation, m_duckPosition);
+    scale = glm::scale(scale, glm::vec3(0.001f));
+    glm::mat4 model = translation * scale;
 
-    GLuint* shadingFunction = m_gui_anisotropicDuck ? 
+    m_sh_duck.Use();
+    m_sh_duck.setM4fv("model", GL_FALSE, model);
+
+    GLuint* shadingFunction = m_gui_bAnisotropicDuck ? 
         &m_duckLightFun.PhongAnisotropic :
         &m_duckLightFun.Phong;
 
@@ -366,7 +398,7 @@ void duckWindow::RenderGUI()
     GenGUI_AppStatistics();
     GenGUI_Light();
     GenGUI_Materials();
-    GenGUI_AnisotropicLight();
+    GenGUI_Duck();
     //ImGui::ShowDemoWindow();
     ImGui::End();
 
@@ -496,13 +528,16 @@ void duckWindow::GenGUI_Materials()
     }
 }
 
-void duckWindow::GenGUI_AnisotropicLight()
+void duckWindow::GenGUI_Duck()
 {
-    if(ImGui::CollapsingHeader("Anisotropic")) 
+    if(ImGui::CollapsingHeader("Duck")) 
     {   
-        ImGui::Checkbox("Anisotropic duck", &m_gui_anisotropicDuck);
+        ImGui::SliderFloat("speed", &m_duckSpeed, 0.001f, 1.0f);
+        ImGui::Checkbox("Draw Curve", &m_gui_bDrawCurve);
+
+        ImGui::Checkbox("Anisotropic duck", &m_gui_bAnisotropicDuck);
         
-        ImGui::BeginDisabled(!m_gui_anisotropicDuck);
+        ImGui::BeginDisabled(!m_gui_bAnisotropicDuck);
         ImGui::DragFloat("shinnes", &m_aniso_shininess);
         ImGui::SliderFloat("a", &m_aniso_a, 0.0f, 1.0f);
         ImGui::SliderFloat("b", &m_aniso_b, 0.0f, 1.0f);

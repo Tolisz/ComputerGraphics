@@ -37,7 +37,7 @@ uniform vec3 cameraPos;
 uniform vec3 objectColor;
 
 layout(binding = 0) uniform sampler2D normalTex;
-layout(binding = 0) uniform samplerCube cubeMap;
+layout(binding = 1) uniform samplerCube cubeMap;
 
 vec3 Phong(vec3 worldPos, vec3 norm, vec3 view)
 {
@@ -84,6 +84,8 @@ vec3 intersectRay(vec3 p, vec3 d)
 
 void main()
 {   
+    //FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+    //return;
     // Compute color of water based on reflectance and refraction
     // ==========================================================
     vec3 norm = normalize(texture(normalTex, i.texCoords).xyz);

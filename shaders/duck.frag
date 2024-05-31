@@ -39,7 +39,7 @@ uniform float anisoShininess;
 uniform float anisoA;
 uniform float anisoB;
 
-layout(binding = 1) uniform sampler2D duckTex; 
+layout(binding = 2) uniform sampler2D duckTex; 
 
 subroutine vec3 LightFunction(vec3 worldPos, vec3 norm, vec3 tang, vec3 bitang, vec3 view, vec3 surfaceColor);
 subroutine uniform LightFunction lightFun;
@@ -74,13 +74,10 @@ vec3 PhongAnisotropic(vec3 worldPos, vec3 norm, vec3 tang, vec3 bitang, vec3 vie
     vec3 T = normalize(tang);
     vec3 B = normalize(bitang);
     mat3 TBN = mat3(T, B, N);
+    vec3 dir = normalize(vec3(anisoA, anisoB, 0.0f));
 
     // ambient 
     vec3 color = material.ka * ambientColor.rgb;
-
-    // float shininess = 32.0;
-    // float a = 0.5;
-    // float b = 0.5;
 
     for (int i = 0; i < min(numberOfLights, MAX_NUM_OF_LIGHTS); i++) {
         // diffuse 
@@ -90,15 +87,18 @@ vec3 PhongAnisotropic(vec3 worldPos, vec3 norm, vec3 tang, vec3 bitang, vec3 vie
         // specular
         vec3 H = normalize(L + V);
         vec3 HT = normalize(TBN * H);
-    
-        float NdotH = max(dot(N, H), 0.0);
-        float TdotH = max(dot(T, HT), 0.0);
-        float BdotH = max(dot(B, HT), 0.0);
 
-        float anisotropicTerm = (TdotH * TdotH / (anisoA * anisoA) + BdotH * BdotH / (anisoB * anisoB)) / (NdotH * NdotH);
-        float specular = pow(max(NdotH, 0.0), anisoShininess) * exp(-anisotropicTerm) / (4.0 * anisoA * anisoB);
+        float cos_b = sqrt(1 - pow(dot(TBN * dir, HT), 2.0f));
+        color += material.ks * light[i].specularColor.rgb * pow(cos_b, anisoShininess);
 
-        color += material.ks * light[i].specularColor.rgb * specular;
+        // float NdotH = max(dot(N, H), 0.0);
+        // float TdotH = max(dot(T, HT), 0.0);
+        // float BdotH = max(dot(B, HT), 0.0);
+
+        // float anisotropicTerm = (TdotH * TdotH / (anisoA * anisoA) + BdotH * BdotH / (anisoB * anisoB)) / (NdotH * NdotH);
+        // float specular = pow(max(NdotH, 0.0), anisoShininess) * exp(-anisotropicTerm) / (4.0 * anisoA * anisoB);
+
+        // color += material.ks * light[i].specularColor.rgb * specular;
     }
 
     return color;
