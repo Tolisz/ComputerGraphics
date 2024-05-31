@@ -72,9 +72,10 @@ private:
     GLuint m_gl_duckTex;
 
     BSplineRandomizer m_BSpline;
-    glm::vec3 m_duckPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+    glm::vec3 m_duckPosition;
+    glm::vec3 m_duckViewDir;
     float m_duckTime = 0.0f;
-    float m_duckSpeed = 0.5f;
+    float m_duckSpeed = 0.1f;
 
     // Anisotropic light
     struct LightFunctionSubroutines {

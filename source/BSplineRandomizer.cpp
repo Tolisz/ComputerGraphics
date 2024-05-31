@@ -42,7 +42,26 @@ glm::vec3 BSplineRandomizer::GetCurvePosition(float t)
 
 glm::vec3 BSplineRandomizer::GetCurveTangent(float t)
 {
-    return glm::vec3(0.0f);
+    float one_t = 1.0f - t;
+
+    m_deCasteljau[0] = m_p0;
+    m_deCasteljau[1] = m_p1;
+    m_deCasteljau[2] = m_p2;
+    m_deCasteljau[3] = m_p3;
+
+    // derivative 
+    for (int i = 0; i < 3; i++) {
+        m_deCasteljau[i] = 3.0f * (m_deCasteljau[i + 1] - m_deCasteljau[i]);
+    }
+
+    // value of the derivative 
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 2 - i; j++) {
+            m_deCasteljau[j] = one_t * m_deCasteljau[j] + t * m_deCasteljau[j + 1];
+        }
+    }
+    
+    return m_deCasteljau[0];
 }
 
 void BSplineRandomizer::GenerateSubsequentCurve()

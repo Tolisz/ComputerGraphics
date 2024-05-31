@@ -17,10 +17,10 @@ duckWindow::duckWindow()
       m_BSpline(
         {0.0f, 0.0f, 0.0f},
         {-0.5f, 0.0f, 0.0f},
-        {-0.5f, 0.0f, -0.5f},
-        {0.0f, 0.0f, -0.5f},
-        {-1.0f, 0.0f, -1.0f},
-        {1.0f, 0.0f, 1.0f}
+        {-0.5f, 0.0f, 0.5f},
+        {0.0f, 0.0f, 0.5f},
+        {-0.95f, 0.0f, -0.95f},
+        {0.95f, 0.0f, 0.95f}
       )
 {}
 
@@ -267,6 +267,7 @@ void duckWindow::UpdateUBOs()
 void duckWindow::UpdateDuckPosition()
 {
     m_duckPosition = m_BSpline.GetCurvePosition(m_duckTime);
+    m_duckViewDir = m_BSpline.GetCurveTangent(m_duckTime);
     m_duckTime += m_deltaTime * m_duckSpeed;
     if (m_duckTime >= 1.0f) {
         m_duckTime = 0.0f;
@@ -322,10 +323,16 @@ void duckWindow::DrawSkyBox()
 
 void duckWindow::DrawDuck()
 {
-    glm::mat4 scale(1.0f), translation(1.0f);
-    translation = glm::translate(translation, m_duckPosition);
-    scale = glm::scale(scale, glm::vec3(0.001f));
-    glm::mat4 model = translation * scale;
+    glm::vec3 V = glm::normalize(m_duckViewDir);
+    glm::vec3 D = glm::vec3(-1.0f, 0.0f, 0.0f);  // Default duck's view direction
+    glm::vec3 DcrossV = glm::cross(D, V);
+    float DdotV = glm::dot(D, V);
+    float angle = glm::acos(DdotV);
+
+    glm::mat4 model = 
+        glm::translate(glm::mat4(1.0f), m_duckPosition) *  
+        glm::rotate(glm::mat4(1.0f), angle, DcrossV) * 
+        glm::scale(glm::mat4(1.0f), glm::vec3(0.001f));
 
     m_sh_duck.Use();
     m_sh_duck.setM4fv("model", GL_FALSE, model);
@@ -533,9 +540,9 @@ void duckWindow::GenGUI_Duck()
     if(ImGui::CollapsingHeader("Duck")) 
     {   
         ImGui::SliderFloat("speed", &m_duckSpeed, 0.001f, 1.0f);
-        ImGui::Checkbox("Draw Curve", &m_gui_bDrawCurve);
+        ImGui::Checkbox("draw Curve", &m_gui_bDrawCurve);
 
-        ImGui::Checkbox("Anisotropic duck", &m_gui_bAnisotropicDuck);
+        ImGui::Checkbox("anisotropic duck", &m_gui_bAnisotropicDuck);
         
         ImGui::BeginDisabled(!m_gui_bAnisotropicDuck);
         ImGui::DragFloat("shinnes", &m_aniso_shininess);
