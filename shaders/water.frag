@@ -14,9 +14,9 @@ layout(location = 0) out vec4 FragColor;
 
 struct Light
 {
-    vec3 position;
-    vec3 diffuseColor;
-    vec3 specularColor;
+    vec4 position;
+    vec4 diffuseColor;
+    vec4 specularColor;
 };
 
 struct Material
@@ -25,9 +25,12 @@ struct Material
     float shininess;
 };
 
+layout(std140, binding = 1) uniform LightsBlock {
+    vec4 ambientColor;
+    Light light[MAX_NUM_OF_LIGHTS];
+};
+ 
 uniform int numberOfLights;
-uniform vec3 ambientColor;
-uniform Light light[MAX_NUM_OF_LIGHTS];
 uniform Material material;
 
 uniform vec3 cameraPos;
@@ -42,16 +45,16 @@ vec3 Phong(vec3 worldPos, vec3 norm, vec3 view)
     vec3 V = normalize(view);
 
     // ambient 
-    vec3 intensity = material.ka * ambientColor;
+    vec3 intensity = material.ka * ambientColor.rgb;
 
     for (int i = 0; i < min(numberOfLights, MAX_NUM_OF_LIGHTS); i++) {
         // diffuse 
-        vec3 L = normalize(light[i].position - worldPos);
-        intensity += material.kd * light[i].diffuseColor * max(dot(N, L), 0.0f);
+        vec3 L = normalize(light[i].position.xyz - worldPos);
+        intensity += material.kd * light[i].diffuseColor.rgb * max(dot(N, L), 0.0f);
 
         // specular
         vec3 R = reflect(-L, N);
-        intensity += material.ks * light[i].specularColor * pow(max(dot(R, V), 0.0f), material.shininess);
+        intensity += material.ks * light[i].specularColor.rgb * pow(max(dot(R, V), 0.0f), material.shininess);
     }
 
     return intensity;

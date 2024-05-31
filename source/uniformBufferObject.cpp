@@ -15,7 +15,7 @@ void uniformBufferObject::CreateUBO(const size_t byteSize, GLenum usageHint)
     glGenBuffers(1, &m_ID);
     glBindBuffer(GL_UNIFORM_BUFFER, m_ID);
     glBufferData(GL_UNIFORM_BUFFER, byteSize, nullptr, usageHint);
-
+    
     m_isInit = true;
     m_byteSize = byteSize;
 }

@@ -71,6 +71,12 @@ void duckWindow::RunInit()
     m.shininess = 128.0f;
     m_materials.insert(std::make_pair("water", m));
 
+    m.ka = glm::vec3(0.2f);
+    m.kd = glm::vec3(1.0f);
+    m.ks = glm::vec3(0.5f);
+    m.shininess = 32.0f;
+    m_materials.insert(std::make_pair("duck", m));
+
     // Water
     m_obj_water.InitGL();
     m_waterColor = glm::vec3(0.0288, 0.960, 0.882);
@@ -79,6 +85,10 @@ void duckWindow::RunInit()
     m_sh_water.AttachShader("shaders/water.vert", GL_VERTEX_SHADER);
     m_sh_water.AttachShader("shaders/water.frag", GL_FRAGMENT_SHADER);
     m_sh_water.Link();
+
+    m_sh_water.Use();
+    m_sh_water.set1i("numberOfLights", m_obj_lights.size());
+    m_sh_water.set1f("a", m_obj_water.GetA());
 
     // skyBox
     m_obj_skyBox.InitGL();
@@ -116,11 +126,15 @@ void duckWindow::RunInit()
     m_sh_duck.AttachShader("shaders/duck.frag", GL_FRAGMENT_SHADER);
     m_sh_duck.Link();
 
+    m_sh_duck.Use();
+    m_sh_duck.set1i("numberOfLights", m_obj_lights.size());
+
     PrepareDuckTexture("resources/meshes/duck/ducktex.jpg");
 
     // OpenGL initial configuration
     // ============================
 
+    // Bind UBOs
     m_UBO_viewProjection.CreateUBO(2 * sizeof(glm::mat4));
     m_UBO_viewProjection.BindBufferBaseToBindingPoint(0);
 
@@ -129,7 +143,15 @@ void duckWindow::RunInit()
     m_sh_duck.BindUniformBlockToBindingPoint("MatricesBlock", 0);
     m_sh_light.BindUniformBlockToBindingPoint("MatricesBlock", 0);
 
+    m_UBO_lights.CreateUBO((1 + 3 * m_maxLightsNum) * sizeof(glm::vec4));
+    m_UBO_lights.BindBufferBaseToBindingPoint(1);
+
+    m_sh_water.BindUniformBlockToBindingPoint("LightsBlock", 1);
+    m_sh_duck.BindUniformBlockToBindingPoint("LightsBlock", 1);
+
+    // Bind Textures
     
+
 
     glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
@@ -201,7 +223,12 @@ void duckWindow::RunRenderTick()
     glm::mat4 projection = m_camera.GetProjectionMatrix(aspect);
     glm::mat4 viewProj[2] = {view, projection};
 
+    m_UBO_viewProjection.BindUBO();
     m_UBO_viewProjection.SetBufferData(0, viewProj, 2 * sizeof(glm::mat4));
+
+    m_UBO_lights.BindUBO();
+    m_UBO_lights.SetBufferData(0, &m_ambientColor, sizeof(glm::vec4));
+    m_UBO_lights.SetBufferData(sizeof(glm::vec4), m_obj_lights.data(), 3 * sizeof(glm::vec4) * m_obj_lights.size());
 
     DrawWater();
     DrawSkyBox();
@@ -236,18 +263,6 @@ void duckWindow::DrawWater()
     // =============================
     m_sh_water.Use();
     
-    m_sh_water.set1i("numberOfLights", m_obj_lights.size());
-    m_sh_water.set3fv("ambientColor", m_ambientColor);
-    for (int i = 0; i < m_maxLightsNum && i < m_obj_lights.size(); i++) {
-        std::string name = "light["; 
-        name += std::to_string(i);
-        name += "]";
-
-        m_sh_water.set3fv((name + ".position").c_str(), m_obj_lights[i].m_position);
-        m_sh_water.set3fv((name + ".diffuseColor").c_str(), m_obj_lights[i].m_diffuseColor);
-        m_sh_water.set3fv((name + ".specularColor").c_str(), m_obj_lights[i].m_specularColor);
-    }
-
     const material& mat = m_materials["water"]; 
     m_sh_water.set3fv("material.ka", mat.ka);
     m_sh_water.set3fv("material.kd", mat.kd);
@@ -256,7 +271,6 @@ void duckWindow::DrawWater()
 
     m_sh_water.set3fv("cameraPos", m_camera.m_worldPos);
     m_sh_water.set3fv("objectColor", m_waterColor);
-    m_sh_water.set1f("a", m_obj_water.GetA());
 
     glActiveTexture(GL_TEXTURE0); 
     glBindTexture(GL_TEXTURE_2D, m_obj_water.GetNormalTex());
@@ -282,6 +296,14 @@ void duckWindow::DrawDuck()
 {
     m_sh_duck.Use();
     m_sh_duck.setM4fv("model", GL_FALSE, glm::scale(glm::mat4x4(1.0f), glm::vec3(0.001f)));
+
+    const material& mat = m_materials["duck"]; 
+    m_sh_duck.set3fv("material.ka", mat.ka);
+    m_sh_duck.set3fv("material.kd", mat.kd);
+    m_sh_duck.set3fv("material.ks", mat.ks);
+    m_sh_duck.set1f("material.shininess", mat.shininess);
+
+    m_sh_duck.set3fv("cameraPos", m_camera.m_worldPos);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_gl_duckTex);

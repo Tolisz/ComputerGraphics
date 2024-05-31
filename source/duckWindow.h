@@ -72,6 +72,7 @@ private:
 
     // UBOs
     uniformBufferObject m_UBO_viewProjection;
+    uniformBufferObject m_UBO_lights;
 
     // *=*=*=*=*=*=*=*=*=*=
     //         GUI

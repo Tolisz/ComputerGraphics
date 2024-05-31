@@ -7,6 +7,7 @@ layout(location = 2) in vec2 inTexCoord;
 
 out FS_IN
 {
+    vec3 worldPos;
     vec3 norm;
     vec2 texCoords;
 } o;
@@ -22,7 +23,10 @@ uniform mat4 model;
 void main()
 {
     o.norm = inNorm;
-    // o.norm = (transpose(inverse(model)) * vec4(inNorm, 0.0f)).xyz; 
     o.texCoords = inTexCoord;
-    gl_Position = projection * view * model * vec4(inPos, 1.0f);
+    
+    vec4 worldPos = model * vec4(inPos, 1.0f); 
+    o.worldPos = worldPos.xyz;
+    
+    gl_Position = projection * view * worldPos;
 }
