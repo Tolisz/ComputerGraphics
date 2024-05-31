@@ -89,6 +89,12 @@ void shader::Link()
     }
 }
 
+GLuint shader::GetID()
+{
+    return m_ID;
+}
+
+
 void shader::Use()
 {
     glUseProgram(m_ID);

@@ -33,6 +33,8 @@ public:
     void Link();
     void Use();
 
+    GLuint GetID();
+
     // *=*=*=*=*=*=*=*=*=*=*=*
     //    UNIFORM SETTERS
     // *=*=*=*=*=*=*=*=*=*=*=*

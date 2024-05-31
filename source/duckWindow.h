@@ -68,7 +68,16 @@ private:
     // duck
     duck m_obj_duck;
     shader m_sh_duck;
-    GLuint m_gl_duckTex;    
+    GLuint m_gl_duckTex;
+
+    struct LightFunctionSubroutines {
+        GLuint Phong;
+        GLuint PhongAnisotropic;
+    } m_duckLightFun;
+
+    float m_aniso_a = 0.5f;
+    float m_aniso_b = 0.5f;
+    float m_aniso_shininess = 32.0f;
 
     // UBOs
     uniformBufferObject m_UBO_viewProjection;
@@ -84,6 +93,8 @@ private:
     float m_gui_AvarageFrameNumRenderTime;
 
     std::string m_gui_renderer;
+
+    bool m_gui_anisotropicDuck = false;
 
 public:
     // *=*=*=*=*=*=*=*=*=*=
@@ -128,6 +139,7 @@ private:
     void GenGUI_AppStatistics();
     void GenGUI_Light();
     void GenGUI_Materials();
+    void GenGUI_AnisotropicLight();
     static void InfoWindowSizeCallback(ImGuiSizeCallbackData* data);
 
 private: 

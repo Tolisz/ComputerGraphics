@@ -134,6 +134,10 @@ void duckWindow::RunInit()
     // OpenGL initial configuration
     // ============================
 
+    // subroutines
+    m_duckLightFun.Phong = glGetSubroutineIndex(m_sh_duck.GetID(), GL_FRAGMENT_SHADER, "Phong");
+    m_duckLightFun.PhongAnisotropic = glGetSubroutineIndex(m_sh_duck.GetID(), GL_FRAGMENT_SHADER, "PhongAnisotropic");
+
     // Bind UBOs
     m_UBO_viewProjection.CreateUBO(2 * sizeof(glm::mat4));
     m_UBO_viewProjection.BindBufferBaseToBindingPoint(0);
@@ -294,6 +298,15 @@ void duckWindow::DrawDuck()
     m_sh_duck.Use();
     m_sh_duck.setM4fv("model", GL_FALSE, glm::scale(glm::mat4x4(1.0f), glm::vec3(0.001f)));
 
+    GLuint* shadingFunction = m_gui_anisotropicDuck ? 
+        &m_duckLightFun.PhongAnisotropic :
+        &m_duckLightFun.Phong;
+
+    glUniformSubroutinesuiv(GL_FRAGMENT_SHADER, 1, shadingFunction);
+    m_sh_duck.set1f("anisoA", m_aniso_a);
+    m_sh_duck.set1f("anisoB", m_aniso_b);
+    m_sh_duck.set1f("anisoShininess", m_aniso_shininess);
+
     const material& mat = m_materials["duck"]; 
     m_sh_duck.set3fv("material.ka", mat.ka);
     m_sh_duck.set3fv("material.kd", mat.kd);
@@ -353,6 +366,7 @@ void duckWindow::RenderGUI()
     GenGUI_AppStatistics();
     GenGUI_Light();
     GenGUI_Materials();
+    GenGUI_AnisotropicLight();
     //ImGui::ShowDemoWindow();
     ImGui::End();
 
@@ -479,6 +493,20 @@ void duckWindow::GenGUI_Materials()
             ImGui::PopID();
             i++;
         }
+    }
+}
+
+void duckWindow::GenGUI_AnisotropicLight()
+{
+    if(ImGui::CollapsingHeader("Anisotropic")) 
+    {   
+        ImGui::Checkbox("Anisotropic duck", &m_gui_anisotropicDuck);
+        
+        ImGui::BeginDisabled(!m_gui_anisotropicDuck);
+        ImGui::DragFloat("shinnes", &m_aniso_shininess);
+        ImGui::SliderFloat("a", &m_aniso_a, 0.0f, 1.0f);
+        ImGui::SliderFloat("b", &m_aniso_b, 0.0f, 1.0f);
+        ImGui::EndDisabled();
     }
 }
 
