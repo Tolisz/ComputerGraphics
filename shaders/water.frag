@@ -37,7 +37,7 @@ uniform vec3 cameraPos;
 uniform vec3 objectColor;
 
 layout(binding = 0) uniform sampler2D normalTex;
-layout(binding = 1) uniform samplerCube cubeMap;
+layout(binding = 0) uniform samplerCube cubeMap;
 
 vec3 Phong(vec3 worldPos, vec3 norm, vec3 view)
 {
@@ -106,7 +106,7 @@ void main()
     vec3 refractColor = vec3(texture(cubeMap, texRefractCoord));
 
     float f = fresnel(norm, view, n1, n2);
-    vec3 color = refractVec != vec3(0.0) ? refractColor + f * reflectColor : reflectColor;
+    vec3 color = refractVec != vec3(0.0) ? (1 - f) * refractColor + f * reflectColor : reflectColor;
     
     // Compute Phong's color of water 
     // =======================================================

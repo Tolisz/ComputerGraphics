@@ -35,7 +35,7 @@ uniform int numberOfLights;
 uniform Material material;
 uniform vec3 cameraPos;
 
-layout(binding = 0) uniform sampler2D duckTex; 
+layout(binding = 1) uniform sampler2D duckTex; 
 
 vec3 Phong(vec3 worldPos, vec3 norm, vec3 view)
 {

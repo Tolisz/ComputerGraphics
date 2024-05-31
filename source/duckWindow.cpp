@@ -49,12 +49,12 @@ void duckWindow::RunInit()
     l.InitGL(); 
 
     l.m_position = glm::vec4(0.4f, 0.5f, 0.4f, 1.0f);
-    l.m_diffuseColor = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+    l.m_diffuseColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     l.m_specularColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     m_obj_lights.push_back(l);
 
     l.m_position = glm::vec4(-0.4f, 0.5f, -0.4f, 1.0f);
-    l.m_diffuseColor = glm::vec4(0.0f, 1.0f, 0.0f, 1.0f);
+    l.m_diffuseColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     l.m_specularColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     m_obj_lights.push_back(l);
 
@@ -150,9 +150,14 @@ void duckWindow::RunInit()
     m_sh_duck.BindUniformBlockToBindingPoint("LightsBlock", 1);
 
     // Bind Textures
-    
+    glActiveTexture(GL_TEXTURE0); 
+    glBindTexture(GL_TEXTURE_2D, m_obj_water.GetNormalTex());
+    glBindTexture(GL_TEXTURE_CUBE_MAP, m_gl_cubeMap);
 
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, m_gl_duckTex);
 
+    // Set Clear colors and blending
     glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
 
@@ -272,20 +277,12 @@ void duckWindow::DrawWater()
     m_sh_water.set3fv("cameraPos", m_camera.m_worldPos);
     m_sh_water.set3fv("objectColor", m_waterColor);
 
-    glActiveTexture(GL_TEXTURE0); 
-    glBindTexture(GL_TEXTURE_2D, m_obj_water.GetNormalTex());
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_gl_cubeMap);
-
     m_obj_water.Draw();
 }
 
 void duckWindow::DrawSkyBox()
 {
     m_sh_skyBox.Use();
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, m_gl_cubeMap);
 
     glEnable(GL_CULL_FACE);
     m_obj_skyBox.Draw();
@@ -304,9 +301,6 @@ void duckWindow::DrawDuck()
     m_sh_duck.set1f("material.shininess", mat.shininess);
 
     m_sh_duck.set3fv("cameraPos", m_camera.m_worldPos);
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_gl_duckTex);
     
     m_obj_duck.Draw();
 }

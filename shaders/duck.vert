@@ -27,6 +27,6 @@ void main()
     
     vec4 worldPos = model * vec4(inPos, 1.0f); 
     o.worldPos = worldPos.xyz;
-    
+
     gl_Position = projection * view * worldPos;
 }
