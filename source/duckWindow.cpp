@@ -3,7 +3,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#include "glm/gtc/matrix_transform.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 #include <glm/trigonometric.hpp>
 #include <stb_image.h>
 
@@ -58,12 +58,12 @@ void duckWindow::RunInit()
     l.InitGL(); 
 
     l.m_position = glm::vec4(0.4f, 0.5f, 0.4f, 1.0f);
-    l.m_diffuseColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    l.m_diffuseColor = glm::vec4(0.7f, 0.7f, 1.0f, 1.0f);
     l.m_specularColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     m_obj_lights.push_back(l);
 
     l.m_position = glm::vec4(-0.4f, 0.5f, -0.4f, 1.0f);
-    l.m_diffuseColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    l.m_diffuseColor = glm::vec4(1.0f, 0.7f, 0.7f, 1.0f);
     l.m_specularColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
     m_obj_lights.push_back(l);
 
@@ -140,6 +140,17 @@ void duckWindow::RunInit()
 
     PrepareDuckTexture("resources/meshes/duck/ducktex.jpg");
 
+    // debug bezier curve
+    m_obj_debugBezier.InitGL();
+    glm::vec3 points[4] = {m_BSpline.m_p0, m_BSpline.m_p1, m_BSpline.m_p2, m_BSpline.m_p3};
+    m_obj_debugBezier.UpdatePoints(points);
+
+    m_sh_debugBezier.Init();
+    m_sh_debugBezier.AttachShader("shaders/bezierCurve.vert", GL_VERTEX_SHADER);
+    //m_sh_debugBezier.AttachShader("shaders/bezierCurve.geom", GL_GEOMETRY_SHADER);
+    m_sh_debugBezier.AttachShader("shaders/bezierCurve.frag", GL_FRAGMENT_SHADER);
+    m_sh_debugBezier.Link();
+
     // OpenGL initial configuration
     // ============================
 
@@ -155,6 +166,7 @@ void duckWindow::RunInit()
     m_sh_skyBox.BindUniformBlockToBindingPoint("MatricesBlock", 0);
     m_sh_duck.BindUniformBlockToBindingPoint("MatricesBlock", 0);
     m_sh_light.BindUniformBlockToBindingPoint("MatricesBlock", 0);
+    m_sh_debugBezier.BindUniformBlockToBindingPoint("MatricesBlock", 0);
 
     m_UBO_lights.CreateUBO((1 + 3 * m_maxLightsNum) * sizeof(glm::vec4));
     m_UBO_lights.BindBufferBaseToBindingPoint(1);
@@ -241,10 +253,11 @@ void duckWindow::RunRenderTick()
     UpdateDuckPosition();
     DisturbWater();
 
-    DrawWater();
+    //DrawWater();
     DrawSkyBox();
     DrawDuck();
     DrawLights();
+    DrawDebugCurve();
 
     RenderGUI();
 }
@@ -273,6 +286,8 @@ void duckWindow::UpdateDuckPosition()
     if (m_duckTime >= 1.0f) {
         m_duckTime = 0.0f;
         m_BSpline.GenerateSubsequentCurve();
+        glm::vec3 points[4] = {m_BSpline.m_p0, m_BSpline.m_p1, m_BSpline.m_p2, m_BSpline.m_p3};
+        m_obj_debugBezier.UpdatePoints(points);
     }
 }
 
@@ -355,6 +370,14 @@ void duckWindow::DrawDuck()
     m_obj_duck.Draw();
 }
 
+void duckWindow::DrawDebugCurve()
+{
+    if (m_gui_bDrawCurve) {
+        m_sh_debugBezier.Use();
+        m_obj_debugBezier.Draw();
+    }
+}
+
 void duckWindow::DisturbWater()
 {
     // drops
@@ -369,9 +392,9 @@ void duckWindow::DisturbWater()
     // }    
 
     // if (m_bDrop) {
-    //     m_curretDropDepth -= (-m_dropMapDepth / m_dropDepthTime) * m_deltaTime;
+    //     m_curretDropDepth -= (-m_dropMaxDepth / m_dropDepthTime) * m_deltaTime;
     //     m_obj_water.DisturbWaterAt(m_dropPos, m_curretDropDepth);
-    //     if (m_curretDropDepth <= m_dropMapDepth) {
+    //     if (m_curretDropDepth <= m_dropMaxDepth) {
     //         m_bDrop = false;
     //     }
     // }
@@ -409,6 +432,7 @@ void duckWindow::RenderGUI()
     GenGUI_Light();
     GenGUI_Materials();
     GenGUI_Duck();
+    GenGUI_Simulation();
     //ImGui::ShowDemoWindow();
     ImGui::End();
 
@@ -552,6 +576,19 @@ void duckWindow::GenGUI_Duck()
         ImGui::SliderFloat("a", &m_aniso_a, 0.0f, 1.0f);
         ImGui::SliderFloat("b", &m_aniso_b, 0.0f, 1.0f);
         ImGui::EndDisabled();
+    }
+}
+
+void duckWindow::GenGUI_Simulation()
+{
+    static float maxWaterDepth = 20.0f;
+
+    if (ImGui::CollapsingHeader("Simulation"))
+    {
+        ImGui::PushItemWidth(100);
+        ImGui::DragFloat("drops' depth", &m_dropMaxDepth, 0.01f, -maxWaterDepth, maxWaterDepth);
+        ImGui::DragFloat("duck's depth", &m_duckMaxDepth, 0.01f, -maxWaterDepth, maxWaterDepth);
+        ImGui::PopItemWidth();
     }
 }
 

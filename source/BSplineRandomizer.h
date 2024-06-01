@@ -16,13 +16,15 @@ private:
     std::mt19937 m_gen;
     std::uniform_real_distribution<float> m_uniformZeroToOne;
 
-private:
+public:
 
     // current points creating a curve 
     glm::vec3 m_p0;
     glm::vec3 m_p1;
     glm::vec3 m_p2;
     glm::vec3 m_p3;
+
+private:
 
     // min and max points creating a boundary
     // parallelepiped
@@ -32,7 +34,7 @@ private:
 private:
 
     glm::vec3 m_deCasteljau[4];
-    //glm::vec3 
+    int m_MaxInterCound = 100;
 
 public:
 
@@ -68,5 +70,5 @@ public:
 private: 
 
     glm::vec3 RayBoxIntersection(glm::vec3 p, glm::vec3 d);
-
+    void DeCasteljau(glm::vec3 tab[], int n, float t);
 };

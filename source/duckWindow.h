@@ -10,6 +10,7 @@
 #include "duck.h"
 #include "uniformBufferObject.h"
 #include "BSplineRandomizer.h"
+#include "bezierCurve.h"
 
 #include <vector>
 #include <map>
@@ -49,7 +50,7 @@ private:
     glm::vec3 m_waterColor;
 
     float m_dropProbability = 0.03f;
-    float m_dropMapDepth = -0.10f;
+    float m_dropMaxDepth = -0.10f;
     float m_dropDepthTime = 0.05f; // in seconds
 
     bool m_bDrop = false;
@@ -77,6 +78,10 @@ private:
     float m_duckTime = 0.0f;
     float m_duckSpeed = 0.1f;
     float m_duckMaxDepth = -0.20f;
+
+    // debug bezier curve
+    bezierCurve m_obj_debugBezier;   
+    shader m_sh_debugBezier; 
 
     // Anisotropic light
     struct LightFunctionSubroutines {
@@ -144,6 +149,7 @@ private:
     void DrawWater();
     void DrawSkyBox();
     void DrawDuck();
+    void DrawDebugCurve();
 
 private: 
 
@@ -152,6 +158,7 @@ private:
     void GenGUI_Light();
     void GenGUI_Materials();
     void GenGUI_Duck();
+    void GenGUI_Simulation();
     static void InfoWindowSizeCallback(ImGuiSizeCallbackData* data);
 
 private: 
