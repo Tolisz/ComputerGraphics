@@ -147,7 +147,7 @@ void duckWindow::RunInit()
 
     m_sh_debugBezier.Init();
     m_sh_debugBezier.AttachShader("shaders/bezierCurve.vert", GL_VERTEX_SHADER);
-    //m_sh_debugBezier.AttachShader("shaders/bezierCurve.geom", GL_GEOMETRY_SHADER);
+    m_sh_debugBezier.AttachShader("shaders/bezierCurve.geom", GL_GEOMETRY_SHADER);
     m_sh_debugBezier.AttachShader("shaders/bezierCurve.frag", GL_FRAGMENT_SHADER);
     m_sh_debugBezier.Link();
 
@@ -253,7 +253,7 @@ void duckWindow::RunRenderTick()
     UpdateDuckPosition();
     DisturbWater();
 
-    //DrawWater();
+    DrawWater();
     DrawSkyBox();
     DrawDuck();
     DrawLights();

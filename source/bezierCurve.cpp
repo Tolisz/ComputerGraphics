@@ -20,13 +20,9 @@ void bezierCurve::InitGL()
 
 void bezierCurve::Draw()
 {
-    glPointSize(10);
-
     glBindVertexArray(m_gl_VAO);
-    glDrawArrays(GL_LINE_STRIP, 0, 4);
-    glDrawArrays(GL_POINTS, 0, 4);
+    glDrawArrays(GL_LINES_ADJACENCY, 0, 4);
     glBindVertexArray(0);
-    glPointSize(0);
 }
 
 void bezierCurve::DeInitGL()
