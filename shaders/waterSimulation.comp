@@ -12,9 +12,11 @@ uniform float dt;
 uniform float c;
 uniform float h;
 
-uniform int i_disturb;
-uniform int j_disturb;
-uniform float disturbHeight;
+//layout(std140, binding = 2) uniform 
+
+uniform int i_disturb[2];
+uniform int j_disturb[2];
+uniform float disturbHeight[2];
 
 void main()
 {   
@@ -32,5 +34,8 @@ void main()
     float y4 = j - 1 >=0 ? curr[i*N+(j-1)].y : 0.0f;
 
     float newY = d * (A * (y1 + y2 + y3 + y4) + B * curr[BI].y - prev[BI].y);
-    prev[BI].y = (i == i_disturb && j == j_disturb) ? disturbHeight : newY; 
+    prev[BI].y = 
+        (i == i_disturb[0] && j == j_disturb[0]) ? disturbHeight[0] : 
+        (i == i_disturb[1] && j == j_disturb[1]) ? disturbHeight[1] : 
+        newY; 
 }

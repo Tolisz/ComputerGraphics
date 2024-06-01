@@ -52,17 +52,25 @@ void waterGrid::SimulateWater(float dt)
     // Compute new height of water elements
     m_sh_waterSimulation.Use();
     if (m_bShouldDisturb) {
-        m_sh_waterSimulation.set1i("i_disturb", m_iDisturb);
-        m_sh_waterSimulation.set1i("j_disturb", m_jDisturb);
-        m_sh_waterSimulation.set1f("disturbHeight", m_disturbHeight);
+        m_sh_waterSimulation.set1i("i_disturb[0]", m_iDisturb[0]);
+        m_sh_waterSimulation.set1i("j_disturb[0]", m_jDisturb[0]);
+        m_sh_waterSimulation.set1f("disturbHeight[0]", m_disturbHeight[0]);
+        
+        m_sh_waterSimulation.set1i("i_disturb[1]", m_iDisturb[1]);
+        m_sh_waterSimulation.set1i("j_disturb[1]", m_jDisturb[1]);
+        m_sh_waterSimulation.set1f("disturbHeight[1]", m_disturbHeight[1]);
     }
     
     glDispatchCompute(m_N, m_N, 1);
     glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
 
     if (m_bShouldDisturb) {
-        m_sh_waterSimulation.set1i("i_disturb", -1);
-        m_sh_waterSimulation.set1i("j_disturb", -1);
+        m_sh_waterSimulation.set1i("i_disturb[0]", -1);
+        m_sh_waterSimulation.set1i("j_disturb[0]", -1);
+
+        m_sh_waterSimulation.set1i("i_disturb[1]", -1);
+        m_sh_waterSimulation.set1i("j_disturb[1]", -1);
+        
         m_bShouldDisturb = false;
     }
 
@@ -204,13 +212,13 @@ float waterGrid::GetA()
     return m_a;
 }
 
-void waterGrid::DisturbWaterAt(glm::vec2 coords, float newHeight)
+void waterGrid::DisturbWaterAt(glm::vec2 coords, float newHeight, int i)
 {
     coords += m_a / 2.0f;
     glm::vec2 indices = glm::floor(((coords / m_a) * (float)m_N));
     
     m_bShouldDisturb = true;
-    m_iDisturb = (int)indices.x;
-    m_jDisturb = (int)indices.y;
-    m_disturbHeight = newHeight;
+    m_iDisturb[i] = (int)indices.x;
+    m_jDisturb[i] = (int)indices.y;
+    m_disturbHeight[i] = newHeight;
 }

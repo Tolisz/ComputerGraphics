@@ -31,9 +31,9 @@ private:
 private:
 
     bool m_bShouldDisturb;
-    int m_iDisturb;
-    int m_jDisturb;
-    float m_disturbHeight;
+    int m_iDisturb[2];
+    int m_jDisturb[2];
+    float m_disturbHeight[2];
 
 public:
 
@@ -58,7 +58,7 @@ public:
     void DeInitGL();
     
     void SimulateWater(float dt);
-    void DisturbWaterAt(glm::vec2 coords, float newHeight);
+    void DisturbWaterAt(glm::vec2 coords, float newHeight, int i);
     void Draw();
 
     GLuint GetNormalTex();

@@ -380,28 +380,28 @@ void duckWindow::DrawDebugCurve()
 
 void duckWindow::DisturbWater()
 {
-    // drops
-    // float a = m_obj_water.GetA();
+    //drops
+    float a = m_obj_water.GetA();
 
-    // if (!m_bDrop && m_uniformZeroToOne(m_gen) <= m_dropProbability) {
-    //     m_bDrop = true;
-    //     m_dropPos = glm::vec2(m_uniformZeroToOne(m_gen), m_uniformZeroToOne(m_gen));
-    //     m_dropPos *= a;
-    //     m_dropPos -= a/2;
-    //     m_curretDropDepth = 0.0f;
-    // }    
-
-    // if (m_bDrop) {
-    //     m_curretDropDepth -= (-m_dropMaxDepth / m_dropDepthTime) * m_deltaTime;
-    //     m_obj_water.DisturbWaterAt(m_dropPos, m_curretDropDepth);
-    //     if (m_curretDropDepth <= m_dropMaxDepth) {
-    //         m_bDrop = false;
-    //     }
-    // }
+    if (!m_bDrop && m_uniformZeroToOne(m_gen) <= m_dropProbability) {
+        m_bDrop = true;
+        m_dropPos = glm::vec2(m_uniformZeroToOne(m_gen), m_uniformZeroToOne(m_gen));
+        m_dropPos *= a;
+        m_dropPos -= a/2;
+        m_curretDropDepth = 0.0f;
+    }    
+    
+    if (m_bDrop) {
+        m_curretDropDepth -= (-m_dropMaxDepth / m_dropDepthTime) * m_deltaTime;
+        m_obj_water.DisturbWaterAt(m_dropPos, m_curretDropDepth, 1);
+        if (m_curretDropDepth <= m_dropMaxDepth) {
+            m_bDrop = false;
+        }
+    }
 
     // duck
     glm::vec2 coords(m_duckPosition.x, m_duckPosition.z);
-    m_obj_water.DisturbWaterAt(coords, m_duckMaxDepth);
+    m_obj_water.DisturbWaterAt(coords, m_duckMaxDepth, 0);
 }
 
 
