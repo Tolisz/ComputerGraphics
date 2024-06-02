@@ -1,6 +1,12 @@
 #version 460 core 
 
-layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+/* Work group size is 32 * 32 = 1024. This value is set because  
+ * GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS must be at least 1024 
+ * according to OpenGL's specification
+ */
+#define localSize 32
+
+layout(local_size_x = localSize, local_size_y = localSize, local_size_z = 1) in;
 
 layout(std430) buffer;
 layout(binding = 0) buffer b_prev { vec4 prev[]; };
@@ -21,7 +27,12 @@ uniform float disturbHeight[2];
 void main()
 {   
     int i = int(gl_GlobalInvocationID.x);
-    int j = int(gl_GlobalInvocationID.y);       
+    int j = int(gl_GlobalInvocationID.y);  
+    
+    if (i >= N || j >= N) {
+        return;
+    }     
+
     int BI = i * N + j; 
 
     float A = (c * c * dt * dt) / (h * h);

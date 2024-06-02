@@ -4,6 +4,12 @@
 
 #include "shader.h"
 
+/* Changes water grid's size. Default value is 256.
+ * This value was used to make optimalizations in the compute shaders
+ */
+#define GRID_SIZE 1536 //1024
+#define GRID_WORK_GROUP_XY_SIZE 32
+
 class waterGrid
 {
 private: 
@@ -16,15 +22,20 @@ private:
 
 private: 
 
+    GLuint m_gl_WorkGroupNum;
     GLuint m_gl_VAO;
+    GLuint m_gl_EBO;
+
+public:
+
     GLuint m_gl_PreviousPosBuffer;
     GLuint m_gl_CurrentPosBuffer;
-    GLuint m_gl_EBO;
     GLuint m_gl_DampingBuffer;
     GLuint m_gl_normalTex;
 
-    GLsizei m_gl_triangleCount;
+private:
 
+    GLsizei m_gl_triangleCount;
     shader m_sh_waterSimulation;
     shader m_sh_computeNormals;
 

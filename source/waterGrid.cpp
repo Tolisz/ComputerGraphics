@@ -8,7 +8,7 @@
 #include <stb_image.h>
 
 waterGrid::waterGrid()
-    : waterGrid(256, 2.0f, 1.0f)
+    : waterGrid(GRID_SIZE, 2.0f, 1.0f)
 { }
 
 waterGrid::waterGrid(int N, float a, float c)
@@ -16,6 +16,8 @@ waterGrid::waterGrid(int N, float a, float c)
 {
     m_h = a / (N - 1);
     m_dt = 1.0f / N;
+
+    m_gl_WorkGroupNum = std::ceil(m_N / GRID_WORK_GROUP_XY_SIZE);
 }
 
 waterGrid::~waterGrid()
@@ -60,8 +62,8 @@ void waterGrid::SimulateWater(float dt)
         m_sh_waterSimulation.set1i("j_disturb[1]", m_jDisturb[1]);
         m_sh_waterSimulation.set1f("disturbHeight[1]", m_disturbHeight[1]);
     }
-    
-    glDispatchCompute(m_N, m_N, 1);
+
+    glDispatchCompute(m_gl_WorkGroupNum, m_gl_WorkGroupNum, 1);
     glMemoryBarrier(GL_BUFFER_UPDATE_BARRIER_BIT);
 
     if (m_bShouldDisturb) {
@@ -76,7 +78,7 @@ void waterGrid::SimulateWater(float dt)
 
     // For computed height update normals;
     m_sh_computeNormals.Use();
-    glDispatchCompute(m_N, m_N, 1);
+    glDispatchCompute(m_gl_WorkGroupNum, m_gl_WorkGroupNum, 1);
     glMemoryBarrier(GL_TEXTURE_UPDATE_BARRIER_BIT);
 
     // swap buffers

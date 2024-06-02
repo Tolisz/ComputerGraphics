@@ -22,7 +22,7 @@ uniform mat4 model;
 
 void main()
 {
-    o.norm = inNorm;
+    o.norm =  mat3(transpose(inverse(model))) * inNorm;
     o.texCoords = inTexCoord;
     
     vec4 worldPos = model * vec4(inPos, 1.0f); 

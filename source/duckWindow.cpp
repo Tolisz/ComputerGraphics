@@ -174,6 +174,13 @@ void duckWindow::RunInit()
     m_sh_water.BindUniformBlockToBindingPoint("LightsBlock", 1);
     m_sh_duck.BindUniformBlockToBindingPoint("LightsBlock", 1);
 
+    // Bind SSBO and image. All of this is used in compute shaders for water simulation
+    // glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_obj_water.m_gl_PreviousPosBuffer);
+    // glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_obj_water.m_gl_CurrentPosBuffer);
+    // glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, m_obj_water.m_gl_DampingBuffer);
+
+    // glBindImageTexture(0, m_obj_water.m_gl_normalTex, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
+
     // Bind Textures
     glActiveTexture(GL_TEXTURE0); 
     glBindTexture(GL_TEXTURE_2D, m_obj_water.GetNormalTex());
