@@ -9,6 +9,7 @@ class shader
 private:
 
     GLuint m_ID;
+    bool m_bIsInit = false;;
 
 public:
 
@@ -32,6 +33,7 @@ public:
     void AttachShader(const std::string& path, GLenum type);
     void Link();
     void Use();
+    void DeInitGL();
 
     GLuint GetID();
 

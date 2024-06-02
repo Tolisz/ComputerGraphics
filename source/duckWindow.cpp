@@ -174,13 +174,6 @@ void duckWindow::RunInit()
     m_sh_water.BindUniformBlockToBindingPoint("LightsBlock", 1);
     m_sh_duck.BindUniformBlockToBindingPoint("LightsBlock", 1);
 
-    // Bind SSBO and image. All of this is used in compute shaders for water simulation
-    // glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, m_obj_water.m_gl_PreviousPosBuffer);
-    // glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, m_obj_water.m_gl_CurrentPosBuffer);
-    // glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, m_obj_water.m_gl_DampingBuffer);
-
-    // glBindImageTexture(0, m_obj_water.m_gl_normalTex, 0, GL_FALSE, 0, GL_WRITE_ONLY, GL_RGBA32F);
-
     // Bind Textures
     glActiveTexture(GL_TEXTURE0); 
     glBindTexture(GL_TEXTURE_2D, m_obj_water.GetNormalTex());
@@ -414,13 +407,31 @@ void duckWindow::DisturbWater()
 
 void duckWindow::RunClear()
 {
+    // Lights
     if (m_obj_lights.size() != 0) {
         m_obj_lights[0].DeInitGL();
     }
+    m_sh_light.DeInitGL();
 
+    // water
     m_obj_water.DeInitGL();
+    m_sh_water.DeInitGL();
+    
+    // skyBox 
     m_obj_skyBox.DeInitGL();
+    m_sh_skyBox.DeInitGL();
+
+    // duck
     m_obj_duck.DeInitGL();
+    m_sh_duck.DeInitGL();
+
+    // bezier curve
+    m_obj_debugBezier.DeInitGL();
+    m_sh_debugBezier.DeInitGL();
+
+    // UBOs
+    m_UBO_viewProjection.DeleteUBO();
+    m_UBO_lights.DeleteUBO();
 }
 
 void duckWindow::RenderGUI()

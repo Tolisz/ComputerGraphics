@@ -10,9 +10,7 @@ shader::shader()
 {}
 
 shader::~shader()
-{
-    glDeleteProgram(m_ID);
-}
+{}
 
 std::string shader::ReadShaderCode(const std::string& codeFilePath)
 {
@@ -41,11 +39,25 @@ std::string shader::ReadShaderCode(const std::string& codeFilePath)
 
 void shader::Init()
 {
+    if (m_bIsInit) {
+        std::cout << "The shader is already Init" << std::endl;
+        return;
+    }
+
+    m_bIsInit = true;
     m_ID = glCreateProgram();
 }
 
 void shader::AttachShader(const std::string& path, GLenum type)
 {
+    if (!m_bIsInit) {
+        std::cout 
+            << "Shader must be initialized befor AttachShader call \n\t[path]: " << path 
+            << "\n\t[type]: " << type 
+            << std::endl;
+        return;
+    }
+
     GLuint sh = glCreateShader(type);
     std::string source = ReadShaderCode(path);
     const char* source_c = source.c_str();
@@ -73,6 +85,11 @@ void shader::AttachShader(const std::string& path, GLenum type)
 
 void shader::Link()
 {
+    if (!m_bIsInit) {
+        std::cout << "Shader must be initialized befor linking" << std::endl;
+        return;
+    }
+
     glLinkProgram(m_ID);
 
     GLint success; 
@@ -94,6 +111,15 @@ GLuint shader::GetID()
     return m_ID;
 }
 
+void shader::DeInitGL()
+{
+    if (!m_bIsInit) {
+        std::cout << "Can not delete shader which wasn't initialized" << std::endl;
+        return;
+    }
+
+    glDeleteShader(m_ID);
+}
 
 void shader::Use()
 {
