@@ -7,7 +7,7 @@
 /* Changes water grid's size. Default value is 256.
  * This value was used to make optimalizations in the compute shaders
  */
-#define GRID_SIZE 1536 //1024
+#define GRID_SIZE 256
 #define GRID_WORK_GROUP_XY_SIZE 32
 
 class waterGrid

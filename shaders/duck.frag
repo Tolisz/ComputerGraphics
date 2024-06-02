@@ -74,7 +74,7 @@ vec3 PhongAnisotropic(vec3 worldPos, vec3 norm, vec3 tang, vec3 bitang, vec3 vie
     vec3 T = normalize(tang);
     vec3 B = normalize(bitang);
     mat3 TBN = mat3(T, B, N);
-    vec3 dir = normalize(vec3(anisoA, anisoB, 0.0f));
+    vec3 dir = normalize(vec3(anisoA, 0.0f, anisoB));
 
     // ambient 
     vec3 color = material.ka * ambientColor.rgb;
@@ -90,15 +90,6 @@ vec3 PhongAnisotropic(vec3 worldPos, vec3 norm, vec3 tang, vec3 bitang, vec3 vie
 
         float cos_b = sqrt(1 - pow(dot(TBN * dir, HT), 2.0f));
         color += material.ks * light[i].specularColor.rgb * pow(cos_b, anisoShininess);
-
-        // float NdotH = max(dot(N, H), 0.0);
-        // float TdotH = max(dot(T, HT), 0.0);
-        // float BdotH = max(dot(B, HT), 0.0);
-
-        // float anisotropicTerm = (TdotH * TdotH / (anisoA * anisoA) + BdotH * BdotH / (anisoB * anisoB)) / (NdotH * NdotH);
-        // float specular = pow(max(NdotH, 0.0), anisoShininess) * exp(-anisotropicTerm) / (4.0 * anisoA * anisoB);
-
-        // color += material.ks * light[i].specularColor.rgb * specular;
     }
 
     return color;
