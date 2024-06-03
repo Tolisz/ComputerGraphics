@@ -1,0 +1,11 @@
+set(TESSELATION_LINK_LIBS   PUBLIC glm
+                            PUBLIC glfw
+                            PUBLIC glad
+                            PUBLIC imgui
+                            PUBLIC stb)
+
+set(TESSELATION_EXECUTABLE_NAME tesselation)
+file(GLOB TESSELATION_SOURCE_FILES *.cpp)
+
+add_executable(${TESSELATION_EXECUTABLE_NAME} ${TESSELATION_SOURCE_FILES})
+target_link_libraries(${TESSELATION_EXECUTABLE_NAME} ${TESSELATION_LINK_LIBS})
