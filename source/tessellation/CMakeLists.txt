@@ -1,8 +1,4 @@
-set(TESSELATION_LINK_LIBS   PUBLIC glm
-                            PUBLIC glfw
-                            PUBLIC glad
-                            PUBLIC imgui
-                            PUBLIC stb)
+set(TESSELATION_LINK_LIBS   PUBLIC common)
 
 set(TESSELATION_EXECUTABLE_NAME tesselation)
 file(GLOB TESSELATION_SOURCE_FILES *.cpp)

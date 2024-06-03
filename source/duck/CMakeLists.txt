@@ -1,8 +1,8 @@
-set(DUCK_LINK_LIBS  PUBLIC glm
-                    PUBLIC glfw
-                    PUBLIC glad
-                    PUBLIC imgui
-                    PUBLIC stb)
+set(DUCK_LINK_LIBS  PUBLIC common)
+                    # PUBLIC glfw
+                    # PUBLIC glad
+                    # PUBLIC imgui
+                    # PUBLIC stb)
 
 set(DUCK_EXECUTABLE_NAME duck)
 file(GLOB DUCK_SOURCE_FILES *.cpp)

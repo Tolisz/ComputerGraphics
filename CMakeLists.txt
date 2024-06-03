@@ -12,6 +12,10 @@ add_subdirectory(externals/glad)
 add_subdirectory(externals/imgui)
 add_subdirectory(externals/stb)
 
+# common elements library
+# *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
+add_subdirectory(source/common)
+
 # executable
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
