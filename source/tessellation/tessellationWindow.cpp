@@ -31,6 +31,14 @@ void tessellationWindow::RunInit()
     m_sh_quad.AttachShader(shPath("quad.frag"), GL_FRAGMENT_SHADER);
     m_sh_quad.Link();
 
+    // Keyboard functions
+    // *=*=*=*=*=*=*=*=*=*=
+
+    m_keyboardMenager.RegisterKey(GLFW_KEY_W)
+    .AddState("On", std::bind(&tessellationWindow::SetPolyMode, this, std::placeholders::_1))
+    .AddState("Off", std::bind(&tessellationWindow::SetPolyMode, this, std::placeholders::_1));
+    SetPolyMode(0);
+    
     // GUI
     // *=*=*=*=*=*=*=*=*=*=
     const GLubyte* renderer = glGetString(GL_RENDERER);
@@ -179,7 +187,28 @@ void tessellationWindow::GenGUI_Tessellation()
 void tessellationWindow::SetUpWindowsCallbacks()
 {
     glfwSetMouseButtonCallback(m_window, &tessellationWindow::MouseButtonCallback);
+    glfwSetKeyCallback(m_window, &tessellationWindow::KeyCallback);
     glfwSetCursorPosCallback(m_window, &tessellationWindow::CursorPosCallback);
+}
+
+void tessellationWindow::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    // (1) GUI callback handling
+    // =========================
+    ImGuiIO& io = ImGui::GetIO();
+    if (io.WantCaptureKeyboard)
+    {
+        ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
+        return;
+    }
+
+    // (2) App callback handling
+    // =========================
+    tessellationWindow* win = GW(window);
+
+    if (action == GLFW_PRESS) {
+        win->m_keyboardMenager.GoToNextState(key);
+    }
 }
 
 void tessellationWindow::MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
@@ -281,6 +310,11 @@ void tessellationWindow::CursorPosCallback(GLFWwindow* window, double xpos, doub
 tessellationWindow* tessellationWindow::GW(GLFWwindow* window)
 {
     return reinterpret_cast<tessellationWindow*>(glfwGetWindowUserPointer(window));
+}
+
+void tessellationWindow::SetPolyMode(unsigned i)
+{
+    glPolygonMode(GL_FRONT_AND_BACK, i == 0 ? GL_LINE : GL_FILL);
 }
 
 void tessellationWindow::SetState(wState newState)

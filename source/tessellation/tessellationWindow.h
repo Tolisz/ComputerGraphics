@@ -6,6 +6,7 @@
 #include "quad.h"
 #include "shader.h"
 #include "uniformBufferObject.h"
+#include "keyboardManager.h"
 
 #include <imgui.h>
 #include <string>
@@ -37,6 +38,8 @@ private:
 
     // UBOs
     uniformBufferObject m_MatriciesUBO;
+
+    keyboardMenager m_keyboardMenager;
 
     // *=*=*=*=*=*=*=*=*=*=
     //         GUI
@@ -80,11 +83,16 @@ private:
 private:
 
     void SetUpWindowsCallbacks();
+    // typedef void (* GLFWkeyfun)(GLFWwindow* window, int key, int scancode, int action, int mods);
+    static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     static void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
     static void MouseButton_RIGHT_Callback(GLFWwindow* window, int action, int mods);
     static void MouseButton_LEFT_Callback(GLFWwindow* window, int action, int mods);
     static void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
     static tessellationWindow* GW(GLFWwindow* window);
+
+    void SetPolyMode(unsigned i);
+
 
 private: 
 
