@@ -48,6 +48,7 @@ private:
     fpsCounter m_gui_fps;
     std::string m_gui_renderer;
     ImVec4 m_gui_hintColor;
+    float m_gui_menuWidth;
 
 public:
 

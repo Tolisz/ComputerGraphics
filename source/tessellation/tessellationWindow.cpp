@@ -34,11 +34,13 @@ void tessellationWindow::RunInit()
     // Keyboard functions
     // *=*=*=*=*=*=*=*=*=*=
 
-    m_keyboardMenager.RegisterKey(GLFW_KEY_W)
+    m_keyboardMenager.RegisterKey(GLFW_KEY_W, "grid view")
     .AddState("On", std::bind(&tessellationWindow::SetPolyMode, this, std::placeholders::_1))
     .AddState("Off", std::bind(&tessellationWindow::SetPolyMode, this, std::placeholders::_1));
     SetPolyMode(0);
     
+
+
     // GUI
     // *=*=*=*=*=*=*=*=*=*=
     const GLubyte* renderer = glGetString(GL_RENDERER);
@@ -110,7 +112,8 @@ void tessellationWindow::RenderGUI()
 void tessellationWindow::InfoWindowSizeCallback(ImGuiSizeCallbackData* data)
 {
     tessellationWindow* win = reinterpret_cast<tessellationWindow*>(data->UserData);
-    data->DesiredSize.y = win->m_height;    
+    data->DesiredSize.y = win->m_height;
+    win->m_gui_menuWidth = data->CurrentSize.x;
 }
 
 
@@ -175,10 +178,31 @@ void tessellationWindow::GenGUI_AppStatistics()
 void tessellationWindow::GenGUI_Tessellation()
 {
     if(ImGui::CollapsingHeader("Tessellation"))
-    {
-        if (ImGui::BeginTable("Tessellation settings", 3)) 
+    {   
+        ImGui::SeparatorText("Parameters");
+
+        ImGui::SeparatorText("Keyboard");
+        if (ImGui::BeginTable("Tessellation settings", 3, 
+                    ImGuiTableFlags_BordersH |
+                    ImGuiTableFlags_BordersV)) 
         {
+            ImGui::TableSetupColumn("Key", ImGuiTableColumnFlags_WidthFixed, 23.0f);
+            ImGui::TableSetupColumn("State", ImGuiTableColumnFlags_WidthFixed, 37.0f);
+            ImGui::TableSetupColumn("Description", ImGuiTableColumnFlags_WidthFixed, m_gui_menuWidth - 100.0f);
+            ImGui::TableHeadersRow();
             
+            for (const auto& key : m_keyboardMenager.GetRegisteredKeys()) {
+                auto info = m_keyboardMenager.GetCurrentState(key);
+                ImGui::TableNextColumn();
+                ImGui::SameLine(15); ImGui::TextWrapped("%c", key);
+                ImGui::TableNextColumn();
+                ImGui::Text(info.name.c_str());
+                ImGui::TableNextColumn();
+                ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + m_gui_menuWidth - 100.0f);
+                ImGui::Text(m_keyboardMenager.GetKeyHint(key).c_str());
+                ImGui::PopTextWrapPos();
+            }   
+
             ImGui::EndTable();
         }
     }

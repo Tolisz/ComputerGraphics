@@ -33,15 +33,19 @@ keyboardMenager::keyboardMenager()
 keyboardMenager::~keyboardMenager()
 {}
 
-keyQueueWrap keyboardMenager::RegisterKey(int key)
+keyQueueWrap keyboardMenager::RegisterKey(int key, std::string hint)
 {
     auto& queue = m_keyToFunQueueMap[key];
+    m_keyToHintMap[key] = hint;
     keyQueueWrap wrapper(queue);
     return std::move(wrapper);
 }
 
 void keyboardMenager::GoToNextState(int key)
 {
+    if (!m_keyToFunQueueMap.contains(key))
+        return;
+
     auto& queue = m_keyToFunQueueMap[key];
     
     // move current state at the end of the queue
@@ -57,4 +61,18 @@ void keyboardMenager::GoToNextState(int key)
 const keyStateInfo& keyboardMenager::GetCurrentState(int key)
 {
     return m_keyToFunQueueMap[key].front();
+}
+
+std::list<int> keyboardMenager::GetRegisteredKeys()
+{
+    std::list<int> l;
+    for(const auto& it : m_keyToFunQueueMap) {
+        l.push_back(it.first);
+    }
+    return std::move(l);
+}
+
+std::string keyboardMenager::GetKeyHint(int key)
+{
+    return m_keyToHintMap[key];
 }
