@@ -28,6 +28,8 @@ void tessellationWindow::RunInit()
     
     m_sh_quad.Init();
     m_sh_quad.AttachShader(shPath("quad.vert"), GL_VERTEX_SHADER);
+    m_sh_quad.AttachShader(shPath("quad.tesc"), GL_TESS_CONTROL_SHADER);
+    m_sh_quad.AttachShader(shPath("quad.tese"), GL_TESS_EVALUATION_SHADER);
     m_sh_quad.AttachShader(shPath("quad.frag"), GL_FRAGMENT_SHADER);
     m_sh_quad.Link();
 
@@ -57,6 +59,10 @@ void tessellationWindow::RunInit()
 
     m_sh_quad.BindUniformBlockToBindingPoint("Matrices", 0);
 
+    // Tessellation params
+    m_tessLevelOuter = glm::vec4(5.0f, 5.0f, 5.0f, 5.0f);
+    m_tessLevelInner = glm::vec2(6.0f, 6.0f);
+
     glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
 }
@@ -73,6 +79,9 @@ void tessellationWindow::RunRenderTick()
 
     // Draw 
     m_sh_quad.Use();
+    m_sh_quad.set4fv("outerLevel", m_tessLevelOuter);
+    m_sh_quad.set2fv("innerLevel", m_tessLevelInner);
+    glPatchParameteri(GL_PATCH_VERTICES, 4);
     m_obj_quad.Draw();
 
     RenderGUI();
@@ -181,6 +190,9 @@ void tessellationWindow::GenGUI_Tessellation()
     {   
         ImGui::SeparatorText("Parameters");
 
+        ImGui::DragFloat4("outer", reinterpret_cast<float*>(&m_tessLevelOuter), 0.1f, 1.0f, 100.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::DragFloat2("inner", reinterpret_cast<float*>(&m_tessLevelInner), 0.1f, 1.0f, 100.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+
         ImGui::SeparatorText("Keyboard");
         if (ImGui::BeginTable("Tessellation settings", 3, 
                     ImGuiTableFlags_BordersH |
@@ -220,9 +232,8 @@ void tessellationWindow::KeyCallback(GLFWwindow* window, int key, int scancode, 
     // (1) GUI callback handling
     // =========================
     ImGuiIO& io = ImGui::GetIO();
-    if (io.WantCaptureKeyboard)
-    {
-        ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
+    ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
+    if (io.WantCaptureKeyboard) {
         return;
     }
 

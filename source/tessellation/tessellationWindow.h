@@ -38,8 +38,11 @@ private:
 
     // UBOs
     uniformBufferObject m_MatriciesUBO;
-
     keyboardMenager m_keyboardMenager;
+
+    // Tessellation params
+    glm::vec4 m_tessLevelOuter;
+    glm::vec2 m_tessLevelInner;
 
     // *=*=*=*=*=*=*=*=*=*=
     //         GUI

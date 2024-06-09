@@ -60,6 +60,7 @@ void quad::DeInitGL()
 void quad::Draw()
 {
     glBindVertexArray(m_gl_VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+    glDrawArrays(GL_PATCHES, 0, 4);
     glBindVertexArray(0);
 }

@@ -155,6 +155,11 @@ void shader::set2i(const char* name, GLint v0, GLint v1)
     glUniform2i(glGetUniformLocation(m_ID, name), v0, v1);
 }
 
+void shader::set2fv(const char* name, const glm::vec2& value)
+{
+    glUniform2fv(glGetUniformLocation(m_ID, name), 1, (float*)&value);
+}
+
 void shader::set3f(const char* name, GLfloat v0, GLfloat v1, GLfloat v2)
 {
     glUniform3f(glGetUniformLocation(m_ID, name), v0, v1, v2);
@@ -163,6 +168,11 @@ void shader::set3f(const char* name, GLfloat v0, GLfloat v1, GLfloat v2)
 void shader::set3fv(const char* name, const glm::vec3& value)
 {
     glUniform3fv(glGetUniformLocation(m_ID, name), 1, (float*)&value);
+}
+
+void shader::set4fv(const char* name, const glm::vec4& value)
+{
+    glUniform4fv(glGetUniformLocation(m_ID, name), 1, (float*)&value);
 }
 
 void shader::setM4fv(const char* name, GLboolean transpose, const glm::mat4& matrix)
