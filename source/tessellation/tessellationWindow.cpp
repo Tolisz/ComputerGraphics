@@ -40,8 +40,12 @@ void tessellationWindow::RunInit()
     .AddState("On", std::bind(&tessellationWindow::SetPolyMode, this, std::placeholders::_1))
     .AddState("Off", std::bind(&tessellationWindow::SetPolyMode, this, std::placeholders::_1));
     SetPolyMode(0);
-    
 
+    m_keyboardMenager.RegisterKey(GLFW_KEY_F, "Bezier control points' shape")
+    .AddState("Flat", std::bind(&tessellationWindow::SetBezierPointsShape, this, std::placeholders::_1))
+    .AddState("Wave", std::bind(&tessellationWindow::SetBezierPointsShape, this, std::placeholders::_1))
+    .AddState("Convex", std::bind(&tessellationWindow::SetBezierPointsShape, this, std::placeholders::_1));
+    SetBezierPointsShape(0);
 
     // GUI
     // *=*=*=*=*=*=*=*=*=*=
@@ -56,12 +60,17 @@ void tessellationWindow::RunInit()
     // UBOs
     m_MatriciesUBO.CreateUBO(2 * sizeof(glm::mat4));
     m_MatriciesUBO.BindBufferBaseToBindingPoint(0);
+    m_ControlPointsUBO.CreateUBO(16 * 3 * sizeof(glm::vec4));
+    m_ControlPointsUBO.BindBufferBaseToBindingPoint(1);
 
     m_sh_quad.BindUniformBlockToBindingPoint("Matrices", 0);
+    m_sh_quad.BindUniformBlockToBindingPoint("ControlPoints", 1);
+
+    PopulateBezierPointsUBO();
 
     // Tessellation params
-    m_tessLevelOuter = glm::vec4(5.0f, 5.0f, 5.0f, 5.0f);
-    m_tessLevelInner = glm::vec2(6.0f, 6.0f);
+    m_tessLevelOuter = glm::vec4(10.0f, 10.0f, 10.0f, 10.0f);
+    m_tessLevelInner = glm::vec2(10.0f, 10.0f);
 
     glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
@@ -81,6 +90,7 @@ void tessellationWindow::RunRenderTick()
     m_sh_quad.Use();
     m_sh_quad.set4fv("outerLevel", m_tessLevelOuter);
     m_sh_quad.set2fv("innerLevel", m_tessLevelInner);
+    m_sh_quad.set1i("bezierShape", m_bezierShape);
     glPatchParameteri(GL_PATCH_VERTICES, 4);
     m_obj_quad.Draw();
 
@@ -97,6 +107,51 @@ std::string tessellationWindow::shPath(std::string fileName)
     return m_shaderBasePath + fileName;
 }
 
+void tessellationWindow::PopulateBezierPointsUBO()
+{
+    std::vector<glm::vec4> points;
+    points.reserve(3 * 16);
+
+    float d = 2.0f / 3;
+
+    // flat
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            points.push_back({
+                -1.0f + d * i, 
+                0.0f, 
+                -1.0f + d * j, 
+                1.0f,
+            });
+        }
+    }
+    // up 
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            points.push_back({
+                -1.0f + d * i, 
+                (i == 0 || j == 0 || i == 3 || j == 3) ? 0.0f : 1.0f, 
+                -1.0f + d * j, 
+                1.0f
+            });
+        }
+    }
+    // down 
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            points.push_back({
+                -1.0f + d * i, 
+                (i == 0 || j == 0 || i == 3 || j == 3) ? 0.0f : -1.0f, 
+                -1.0f + d * j, 
+                1.0f
+            });
+        }
+    }
+
+    m_ControlPointsUBO.BindUBO();
+    m_ControlPointsUBO.SetBufferData(0, points.data(), sizeof(glm::vec4) * points.size());
+}
+
 void tessellationWindow::RenderGUI()
 {
     ImGui_ImplOpenGL3_NewFrame();
@@ -109,7 +164,7 @@ void tessellationWindow::RenderGUI()
     ImGui::Begin("Project: Tessellation", (bool*)0, ImGuiWindowFlags_NoCollapse);
     GenGUI_AppStatistics();
     GenGUI_Tessellation();
-    ImGui::ShowDemoWindow();
+    // ImGui::ShowDemoWindow();
     ImGui::End();
 
     // *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
@@ -350,6 +405,11 @@ tessellationWindow* tessellationWindow::GW(GLFWwindow* window)
 void tessellationWindow::SetPolyMode(unsigned i)
 {
     glPolygonMode(GL_FRONT_AND_BACK, i == 0 ? GL_LINE : GL_FILL);
+}
+
+void tessellationWindow::SetBezierPointsShape(unsigned i)
+{
+    m_bezierShape = i;
 }
 
 void tessellationWindow::SetState(wState newState)

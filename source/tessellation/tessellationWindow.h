@@ -38,11 +38,14 @@ private:
 
     // UBOs
     uniformBufferObject m_MatriciesUBO;
+    uniformBufferObject m_ControlPointsUBO;
+    
     keyboardMenager m_keyboardMenager;
 
     // Tessellation params
     glm::vec4 m_tessLevelOuter;
     glm::vec2 m_tessLevelInner;
+    int m_bezierShape;
 
     // *=*=*=*=*=*=*=*=*=*=
     //         GUI
@@ -75,6 +78,7 @@ private:
 private: 
 
     static std::string shPath(std::string fileName);
+    void PopulateBezierPointsUBO();
 
 private:
 
@@ -96,6 +100,7 @@ private:
     static tessellationWindow* GW(GLFWwindow* window);
 
     void SetPolyMode(unsigned i);
+    void SetBezierPointsShape(unsigned i);
 
 
 private: 
