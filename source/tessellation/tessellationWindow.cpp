@@ -280,6 +280,16 @@ void tessellationWindow::SetUpWindowsCallbacks()
     glfwSetMouseButtonCallback(m_window, &tessellationWindow::MouseButtonCallback);
     glfwSetKeyCallback(m_window, &tessellationWindow::KeyCallback);
     glfwSetCursorPosCallback(m_window, &tessellationWindow::CursorPosCallback);
+    glfwSetWindowSizeCallback(m_window, &tessellationWindow::WindowSizeCallback);
+}
+
+void tessellationWindow::WindowSizeCallback(GLFWwindow* window, int width, int height)
+{
+    tessellationWindow* win = GW(window);
+
+    win->m_width = width;
+    win->m_height = height;
+    glViewport(0, 0, width, height);
 }
 
 void tessellationWindow::KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
