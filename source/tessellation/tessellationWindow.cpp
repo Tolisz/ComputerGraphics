@@ -61,8 +61,8 @@ void tessellationWindow::RunInit()
 
     m_keyboardMenager.RegisterKey(GLFW_KEY_F, "Bezier control points' shape")
     .AddState("Flat", std::bind(&tessellationWindow::SetBezierPointsShape, this, std::placeholders::_1))
-    .AddState("Wave", std::bind(&tessellationWindow::SetBezierPointsShape, this, std::placeholders::_1))
-    .AddState("Convex", std::bind(&tessellationWindow::SetBezierPointsShape, this, std::placeholders::_1));
+    .AddState("Convex", std::bind(&tessellationWindow::SetBezierPointsShape, this, std::placeholders::_1))
+    .AddState("Wave", std::bind(&tessellationWindow::SetBezierPointsShape, this, std::placeholders::_1));
     SetBezierPointsShape(0);
 
     m_keyboardMenager.RegisterKey(GLFW_KEY_C, "Show Bezier control points")
@@ -131,7 +131,7 @@ void tessellationWindow::RunRenderTick()
     if (m_bShowControlPoints) 
     {
         m_sh_controlPoints.Use();
-        m_sh_quad.set1i("bezierShape", m_bezierShape);
+        m_sh_controlPoints.set1i("bezierShape", m_bezierShape);
         m_obj_controlPoints.Draw();
     }
 
