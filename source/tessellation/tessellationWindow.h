@@ -13,6 +13,7 @@
 #include <string>
 
 #define CONTROL_POINTS_SETS 5
+#define NUM_SIDE_PATCHES 4
 
 class tessellationWindow: public glfwWindowWrap
 {
@@ -39,6 +40,8 @@ private:
     quad m_obj_quad;
     shader m_sh_quad;
 
+    glm::mat4 m_modelMatrices[NUM_SIDE_PATCHES * NUM_SIDE_PATCHES];
+
     // control points of Bezier
     controlPoints m_obj_controlPoints;
     shader m_sh_controlPoints;
@@ -46,6 +49,7 @@ private:
     // Options
     bool m_bShowControlPoints;
     bool m_bUsePhong;
+    bool m_bDisplayPatches;
 
     // UBOs
     uniformBufferObject m_MatriciesUBO;
@@ -110,11 +114,14 @@ private:
     static void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
     static tessellationWindow* GW(GLFWwindow* window);
 
+    void InitKeyboardMenager();
     void SetPolyMode(unsigned i);
     void SetBezierPointsShape(unsigned i);
     void SetShowBezierPoints(unsigned i);
     void SetPhongShading(unsigned i);
+    void SetDisplayPatches(unsigned i);
 
+    void PreparePatchesModelMatrices();
 
 private: 
 

@@ -8,6 +8,8 @@ layout(std140, binding = 0) uniform Matrices
     mat4 projection;
 };
 
+uniform mat4 model;
+
 layout(std140, binding = 1) uniform ControlPoints
 {
     // 0 - flat, 1 - up, 2 - down
@@ -18,5 +20,5 @@ uniform int bezierShape;
 
 void main() 
 {
-    gl_Position = projection * view * p[gl_VertexID + 16 * bezierShape];
+    gl_Position = projection * view * model * p[gl_VertexID + 16 * bezierShape];
 }

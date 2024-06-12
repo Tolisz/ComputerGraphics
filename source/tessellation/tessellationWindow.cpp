@@ -3,6 +3,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include <glm/trigonometric.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
 std::string tessellationWindow::m_shaderBasePath = "shaders/tessellation/";
@@ -51,29 +52,8 @@ void tessellationWindow::RunInit()
     m_sh_controlPoints.AttachShader(shPath("controlPoints.frag"), GL_FRAGMENT_SHADER);
     m_sh_controlPoints.Link();
 
-    // Keyboard functions
-    // *=*=*=*=*=*=*=*=*=*=
-
-    m_keyboardMenager.RegisterKey(GLFW_KEY_W, "grid view")
-    .AddState("On", std::bind(&tessellationWindow::SetPolyMode, this, std::placeholders::_1))
-    .AddState("Off", std::bind(&tessellationWindow::SetPolyMode, this, std::placeholders::_1));
-    SetPolyMode(0);
-
-    m_keyboardMenager.RegisterKey(GLFW_KEY_F, "Bezier control points' shape")
-    .AddState("Flat", std::bind(&tessellationWindow::SetBezierPointsShape, this, std::placeholders::_1))
-    .AddState("Convex", std::bind(&tessellationWindow::SetBezierPointsShape, this, std::placeholders::_1))
-    .AddState("Wave", std::bind(&tessellationWindow::SetBezierPointsShape, this, std::placeholders::_1));
-    SetBezierPointsShape(0);
-
-    m_keyboardMenager.RegisterKey(GLFW_KEY_C, "Show Bezier control points")
-    .AddState("Off", std::bind(&tessellationWindow::SetShowBezierPoints, this, std::placeholders::_1))
-    .AddState("On", std::bind(&tessellationWindow::SetShowBezierPoints, this, std::placeholders::_1));
-    SetShowBezierPoints(0);
-
-    m_keyboardMenager.RegisterKey(GLFW_KEY_S, "Phong Shading of the surface")
-    .AddState("Off", std::bind(&tessellationWindow::SetPhongShading, this, std::placeholders::_1))
-    .AddState("On",  std::bind(&tessellationWindow::SetPhongShading, this, std::placeholders::_1));
-    SetPhongShading(0);
+    InitKeyboardMenager();
+    PreparePatchesModelMatrices();
 
     // GUI
     // *=*=*=*=*=*=*=*=*=*=
@@ -123,15 +103,28 @@ void tessellationWindow::RunRenderTick()
     m_sh_quad.set1i("bezierShape", m_bezierShape);
     m_sh_quad.set3fv("viewPos", m_camera.m_worldPos);
     m_sh_quad.set1b("UsePhong", m_bUsePhong);
-
-    m_sh_quad.setM4fv("model", GL_FALSE, glm::mat4(1.0f));
     glPatchParameteri(GL_PATCH_VERTICES, 4);
-    m_obj_quad.Draw();
+    
+    if (m_bDisplayPatches) {
+        for (int i = 0; i < NUM_SIDE_PATCHES * NUM_SIDE_PATCHES; ++i) {
+            m_sh_quad.setM4fv("model", GL_FALSE, m_modelMatrices[i]);
+            m_obj_quad.Draw();
+        }
+    }
+    else  {
+        m_sh_quad.setM4fv("model", GL_FALSE, glm::mat4(1.0f));
+        m_obj_quad.Draw();
+    }
 
-    if (m_bShowControlPoints) 
-    {
+    if (m_bShowControlPoints) {
         m_sh_controlPoints.Use();
         m_sh_controlPoints.set1i("bezierShape", m_bezierShape);
+        if (m_bDisplayPatches) {
+            m_sh_controlPoints.setM4fv("model", GL_FALSE, m_modelMatrices[0]);
+        }
+        else {
+            m_sh_controlPoints.setM4fv("model", GL_FALSE, glm::mat4(1.0f));
+        }
         m_obj_controlPoints.Draw();
     }
 
@@ -312,8 +305,26 @@ void tessellationWindow::GenGUI_Tessellation()
     {   
         ImGui::SeparatorText("Parameters");
 
-        ImGui::DragFloat4("outer", reinterpret_cast<float*>(&m_tessLevelOuter), 0.1f, 1.0f, 100.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::DragFloat2("inner", reinterpret_cast<float*>(&m_tessLevelInner), 0.1f, 1.0f, 100.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp);
+        glm::vec4 prevTessOuter = m_tessLevelOuter;
+        if (ImGui::DragFloat4("outer", reinterpret_cast<float*>(&m_tessLevelOuter), 0.1f, 1.0f, 100.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp))
+        {   
+            // When display patches is turned on, outer tessellation 
+            // [0] = [2] and [1] = [3], so inner patches don't have 
+            // any holes.
+            if (m_bDisplayPatches)
+            {
+                if (prevTessOuter.x != m_tessLevelOuter.x) {
+                    m_tessLevelOuter.z = m_tessLevelOuter.x;
+                } else if (prevTessOuter.z != m_tessLevelOuter.z) {
+                    m_tessLevelOuter.x = m_tessLevelOuter.z;
+                } else if (prevTessOuter.y != m_tessLevelOuter.y) {
+                    m_tessLevelOuter.w = m_tessLevelOuter.y;
+                } else if (prevTessOuter.w != m_tessLevelOuter.w) {
+                    m_tessLevelOuter.y = m_tessLevelOuter.w;
+                }
+            }
+        }
+        ImGui::DragFloat2("inner", reinterpret_cast<float*>(&m_tessLevelInner), 0.1f, 1.0f, 100.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp); 
 
         ImGui::SeparatorText("Keyboard");
         if (ImGui::BeginTable("Tessellation settings", 3, 
@@ -328,7 +339,7 @@ void tessellationWindow::GenGUI_Tessellation()
             for (const auto& key : m_keyboardMenager.GetRegisteredKeys()) {
                 auto info = m_keyboardMenager.GetCurrentState(key);
                 ImGui::TableNextColumn();
-                ImGui::SameLine(15); ImGui::TextWrapped("%c", key);
+                ImGui::SameLine(15); ImGui::TextColored(m_gui_hintColor ,"%c", key);
                 ImGui::TableNextColumn();
                 ImGui::Text(info.name.c_str());
                 ImGui::TableNextColumn();
@@ -479,6 +490,35 @@ tessellationWindow* tessellationWindow::GW(GLFWwindow* window)
     return reinterpret_cast<tessellationWindow*>(glfwGetWindowUserPointer(window));
 }
 
+void tessellationWindow::InitKeyboardMenager()
+{
+    m_keyboardMenager.RegisterKey(GLFW_KEY_W, "grid view")
+    .AddState("On", std::bind(&tessellationWindow::SetPolyMode, this, std::placeholders::_1))
+    .AddState("Off", std::bind(&tessellationWindow::SetPolyMode, this, std::placeholders::_1));
+    SetPolyMode(0);
+
+    m_keyboardMenager.RegisterKey(GLFW_KEY_F, "Bezier control points' shape")
+    .AddState("Flat", std::bind(&tessellationWindow::SetBezierPointsShape, this, std::placeholders::_1))
+    .AddState("Convex", std::bind(&tessellationWindow::SetBezierPointsShape, this, std::placeholders::_1))
+    .AddState("Wave", std::bind(&tessellationWindow::SetBezierPointsShape, this, std::placeholders::_1));
+    SetBezierPointsShape(0);
+
+    m_keyboardMenager.RegisterKey(GLFW_KEY_C, "Show Bezier control points")
+    .AddState("Off", std::bind(&tessellationWindow::SetShowBezierPoints, this, std::placeholders::_1))
+    .AddState("On", std::bind(&tessellationWindow::SetShowBezierPoints, this, std::placeholders::_1));
+    SetShowBezierPoints(0);
+
+    m_keyboardMenager.RegisterKey(GLFW_KEY_S, "Phong Shading of the surface")
+    .AddState("Off", std::bind(&tessellationWindow::SetPhongShading, this, std::placeholders::_1))
+    .AddState("On",  std::bind(&tessellationWindow::SetPhongShading, this, std::placeholders::_1));
+    SetPhongShading(0);
+
+    m_keyboardMenager.RegisterKey(GLFW_KEY_Q, "Display 16 Bezier Patches")
+    .AddState("Off", std::bind(&tessellationWindow::SetDisplayPatches, this, std::placeholders::_1))
+    .AddState("On", std::bind(&tessellationWindow::SetDisplayPatches, this, std::placeholders::_1));
+    SetDisplayPatches(0);
+}
+
 void tessellationWindow::SetPolyMode(unsigned i)
 {
     glPolygonMode(GL_FRONT_AND_BACK, i == 0 ? GL_LINE : GL_FILL);
@@ -510,6 +550,49 @@ void tessellationWindow::SetShowBezierPoints(unsigned i)
 void tessellationWindow::SetPhongShading(unsigned i)
 {
     m_bUsePhong = static_cast<bool>(i);
+}
+
+void tessellationWindow::SetDisplayPatches(unsigned i)
+{
+    m_bDisplayPatches = static_cast<bool>(i);
+
+    if (m_bDisplayPatches) {
+        if (m_tessLevelOuter.x < m_tessLevelOuter.z) {
+            m_tessLevelOuter.x = m_tessLevelOuter.z;
+        } else {
+            m_tessLevelOuter.z = m_tessLevelOuter.x;
+        }
+
+        if (m_tessLevelOuter.y < m_tessLevelOuter.w) {
+            m_tessLevelOuter.y = m_tessLevelOuter.w;
+        } else {
+            m_tessLevelOuter.w = m_tessLevelOuter.y;
+        }
+    }
+}
+
+void tessellationWindow::PreparePatchesModelMatrices()
+{
+    float sideSize = 1.0f;
+    float defaultSize = 2.0f;   // Size as defined at VBO;
+
+    glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(sideSize / defaultSize));
+    glm::mat4 translation;
+
+    glm::vec3 start(
+        - sideSize * (NUM_SIDE_PATCHES / 2) + (NUM_SIDE_PATCHES % 2 ? 0.0f : sideSize / 2.0f), 
+        0.0f,
+        sideSize * (NUM_SIDE_PATCHES / 2) - (NUM_SIDE_PATCHES % 2 ? 0.0f : sideSize / 2.0f)
+    );
+
+    for (int i = 0; i < NUM_SIDE_PATCHES; ++i) {
+        for (int j = 0; j < NUM_SIDE_PATCHES; ++j) {
+            translation = glm::translate(glm::mat4(1.0f), 
+                glm::vec3(start.x + sideSize * i, 0.0f, start.z - sideSize * j));
+            
+            m_modelMatrices[4*i +j] = translation * scale;
+        }
+    }
 }
 
 void tessellationWindow::SetState(wState newState)

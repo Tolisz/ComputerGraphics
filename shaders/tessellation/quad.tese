@@ -99,5 +99,5 @@ void main()
     vec3 norm = BezierPatchNormal(u, v);
     o.norm = mat3(transpose(inverse(model))) * norm;
     
-    gl_Position = projection * view * pos;
+    gl_Position = projection * view * vec4(o.worldPos, 1.0f);
 }
