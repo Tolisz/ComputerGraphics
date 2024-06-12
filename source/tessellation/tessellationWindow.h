@@ -12,6 +12,8 @@
 #include <imgui.h>
 #include <string>
 
+#define CONTROL_POINTS_SETS 5
+
 class tessellationWindow: public glfwWindowWrap
 {
 private: 
@@ -40,7 +42,10 @@ private:
     // control points of Bezier
     controlPoints m_obj_controlPoints;
     shader m_sh_controlPoints;
+
+    // Options
     bool m_bShowControlPoints;
+    bool m_bUsePhong;
 
     // UBOs
     uniformBufferObject m_MatriciesUBO;
@@ -108,6 +113,7 @@ private:
     void SetPolyMode(unsigned i);
     void SetBezierPointsShape(unsigned i);
     void SetShowBezierPoints(unsigned i);
+    void SetPhongShading(unsigned i);
 
 
 private: 

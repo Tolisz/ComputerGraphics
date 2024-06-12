@@ -33,6 +33,17 @@ void tessellationWindow::RunInit()
     m_sh_quad.AttachShader(shPath("quad.frag"), GL_FRAGMENT_SHADER);
     m_sh_quad.Link();
 
+    /* Set Light parameters */
+    m_sh_quad.Use();
+    m_sh_quad.set3fv("mat.ka", glm::vec3(0.1f, 0.1f, 0.1f));
+    m_sh_quad.set3fv("mat.kd", glm::vec3(0.8f, 0.8f, 0.8f));
+    m_sh_quad.set3fv("mat.ks", glm::vec3(1.0f, 1.0f, 1.0f));
+    m_sh_quad.set1f("mat.shininess", 32.0f);
+    m_sh_quad.set3fv("lgt.ambient", glm::vec3(1.0f, 1.0f, 1.0f));
+    m_sh_quad.set3fv("lgt.diffuse", glm::vec3(0.0855f, 0.287f, 0.950f));
+    m_sh_quad.set3fv("lgt.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    m_sh_quad.set3fv("lgt.position", glm::vec3(0.0f, 5.0f, 0.0f));
+
     m_obj_controlPoints.InitGL();
 
     m_sh_controlPoints.Init();
@@ -57,7 +68,12 @@ void tessellationWindow::RunInit()
     m_keyboardMenager.RegisterKey(GLFW_KEY_C, "Show Bezier control points")
     .AddState("Off", std::bind(&tessellationWindow::SetShowBezierPoints, this, std::placeholders::_1))
     .AddState("On", std::bind(&tessellationWindow::SetShowBezierPoints, this, std::placeholders::_1));
-    SetBezierPointsShape(0);
+    SetShowBezierPoints(0);
+
+    m_keyboardMenager.RegisterKey(GLFW_KEY_S, "Phong Shading of the surface")
+    .AddState("Off", std::bind(&tessellationWindow::SetPhongShading, this, std::placeholders::_1))
+    .AddState("On",  std::bind(&tessellationWindow::SetPhongShading, this, std::placeholders::_1));
+    SetPhongShading(0);
 
     // GUI
     // *=*=*=*=*=*=*=*=*=*=
@@ -72,7 +88,7 @@ void tessellationWindow::RunInit()
     // UBOs
     m_MatriciesUBO.CreateUBO(2 * sizeof(glm::mat4));
     m_MatriciesUBO.BindBufferBaseToBindingPoint(0);
-    m_ControlPointsUBO.CreateUBO(16 * 3 * sizeof(glm::vec4));
+    m_ControlPointsUBO.CreateUBO(16 * CONTROL_POINTS_SETS * sizeof(glm::vec4));
     m_ControlPointsUBO.BindBufferBaseToBindingPoint(1);
 
     m_sh_quad.BindUniformBlockToBindingPoint("Matrices", 0);
@@ -105,6 +121,10 @@ void tessellationWindow::RunRenderTick()
     m_sh_quad.set4fv("outerLevel", m_tessLevelOuter);
     m_sh_quad.set2fv("innerLevel", m_tessLevelInner);
     m_sh_quad.set1i("bezierShape", m_bezierShape);
+    m_sh_quad.set3fv("viewPos", m_camera.m_worldPos);
+    m_sh_quad.set1b("UsePhong", m_bUsePhong);
+
+    m_sh_quad.setM4fv("model", GL_FALSE, glm::mat4(1.0f));
     glPatchParameteri(GL_PATCH_VERTICES, 4);
     m_obj_quad.Draw();
 
@@ -135,7 +155,7 @@ std::string tessellationWindow::shPath(std::string fileName)
 void tessellationWindow::PopulateBezierPointsUBO()
 {
     std::vector<glm::vec4> points;
-    points.reserve(3 * 16);
+    points.reserve(CONTROL_POINTS_SETS * 16);
 
     float d = 2.0f / 3;
 
@@ -150,6 +170,17 @@ void tessellationWindow::PopulateBezierPointsUBO()
             });
         }
     }
+    // down 
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            points.push_back({
+                -1.0f + d * i, 
+                (i == 0 || j == 0 || i == 3 || j == 3) ? 0.0f : -1.0f, 
+                -1.0f + d * j, 
+                1.0f
+            });
+        }
+    }
     // up 
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
@@ -161,12 +192,23 @@ void tessellationWindow::PopulateBezierPointsUBO()
             });
         }
     }
-    // down 
+    // wave up 
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             points.push_back({
                 -1.0f + d * i, 
-                (i == 0 || j == 0 || i == 3 || j == 3) ? 0.0f : -1.0f, 
+                (i == 0 || i == 3) ? 0.0f : 0.5f, 
+                -1.0f + d * j, 
+                1.0f
+            });
+        }
+    }
+    //wave down
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            points.push_back({
+                -1.0f + d * i, 
+                (i == 0 || i == 3) ? 0.0f : -0.5f, 
                 -1.0f + d * j, 
                 1.0f
             });
@@ -444,12 +486,30 @@ void tessellationWindow::SetPolyMode(unsigned i)
 
 void tessellationWindow::SetBezierPointsShape(unsigned i)
 {
-    m_bezierShape = i;
+    switch (i)
+    {
+    case 0:
+        m_bezierShape = 0;
+        break;
+    case 1:
+        m_bezierShape = 1;
+        break;
+    case 2:
+        m_bezierShape = 3;
+        break;    
+    default:
+        break;
+    }
 }
 
 void tessellationWindow::SetShowBezierPoints(unsigned i)
 {
     m_bShowControlPoints = static_cast<bool>(i);
+}
+
+void tessellationWindow::SetPhongShading(unsigned i)
+{
+    m_bUsePhong = static_cast<bool>(i);
 }
 
 void tessellationWindow::SetState(wState newState)
