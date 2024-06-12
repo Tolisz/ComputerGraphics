@@ -33,6 +33,13 @@ void tessellationWindow::RunInit()
     m_sh_quad.AttachShader(shPath("quad.frag"), GL_FRAGMENT_SHADER);
     m_sh_quad.Link();
 
+    m_obj_controlPoints.InitGL();
+
+    m_sh_controlPoints.Init();
+    m_sh_controlPoints.AttachShader(shPath("controlPoints.vert"), GL_VERTEX_SHADER);
+    m_sh_controlPoints.AttachShader(shPath("controlPoints.frag"), GL_FRAGMENT_SHADER);
+    m_sh_controlPoints.Link();
+
     // Keyboard functions
     // *=*=*=*=*=*=*=*=*=*=
 
@@ -45,6 +52,11 @@ void tessellationWindow::RunInit()
     .AddState("Flat", std::bind(&tessellationWindow::SetBezierPointsShape, this, std::placeholders::_1))
     .AddState("Wave", std::bind(&tessellationWindow::SetBezierPointsShape, this, std::placeholders::_1))
     .AddState("Convex", std::bind(&tessellationWindow::SetBezierPointsShape, this, std::placeholders::_1));
+    SetBezierPointsShape(0);
+
+    m_keyboardMenager.RegisterKey(GLFW_KEY_C, "Show Bezier control points")
+    .AddState("Off", std::bind(&tessellationWindow::SetShowBezierPoints, this, std::placeholders::_1))
+    .AddState("On", std::bind(&tessellationWindow::SetShowBezierPoints, this, std::placeholders::_1));
     SetBezierPointsShape(0);
 
     // GUI
@@ -65,6 +77,7 @@ void tessellationWindow::RunInit()
 
     m_sh_quad.BindUniformBlockToBindingPoint("Matrices", 0);
     m_sh_quad.BindUniformBlockToBindingPoint("ControlPoints", 1);
+    m_sh_controlPoints.BindUniformBlockToBindingPoint("ControlPoints", 1);
 
     PopulateBezierPointsUBO();
 
@@ -87,6 +100,7 @@ void tessellationWindow::RunRenderTick()
     m_MatriciesUBO.SetBufferData(0, matrices, 2 * sizeof(glm::mat4));
 
     // Draw 
+
     m_sh_quad.Use();
     m_sh_quad.set4fv("outerLevel", m_tessLevelOuter);
     m_sh_quad.set2fv("innerLevel", m_tessLevelInner);
@@ -94,12 +108,23 @@ void tessellationWindow::RunRenderTick()
     glPatchParameteri(GL_PATCH_VERTICES, 4);
     m_obj_quad.Draw();
 
+    if (m_bShowControlPoints) 
+    {
+        m_sh_controlPoints.Use();
+        m_sh_quad.set1i("bezierShape", m_bezierShape);
+        m_obj_controlPoints.Draw();
+    }
+
     RenderGUI();
 }
 
 void tessellationWindow::RunClear()
 {
     m_obj_quad.DeInitGL();
+    m_sh_quad.DeInitGL();
+
+    m_obj_controlPoints.DeInitGL();
+    m_sh_controlPoints.DeInitGL();
 }
 
 std::string tessellationWindow::shPath(std::string fileName)
@@ -420,6 +445,11 @@ void tessellationWindow::SetPolyMode(unsigned i)
 void tessellationWindow::SetBezierPointsShape(unsigned i)
 {
     m_bezierShape = i;
+}
+
+void tessellationWindow::SetShowBezierPoints(unsigned i)
+{
+    m_bShowControlPoints = static_cast<bool>(i);
 }
 
 void tessellationWindow::SetState(wState newState)

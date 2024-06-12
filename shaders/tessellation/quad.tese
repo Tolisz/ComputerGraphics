@@ -53,7 +53,7 @@ void main()
     vec4 pos = BezierPatch(u, v);
     gl_Position = projection * view * pos;
 
-    color = vec4(u == 0.0f || v == 0.0f || u == 1.0f || v == 1.0f ? 1.0f : 0.0f, 0.0f, 0.0f, 1.0f);
+    color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
     // Bilinear interpolation 
     // 

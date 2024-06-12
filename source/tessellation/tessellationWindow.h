@@ -7,6 +7,7 @@
 #include "shader.h"
 #include "uniformBufferObject.h"
 #include "keyboardManager.h"
+#include "controlPoints.h"
 
 #include <imgui.h>
 #include <string>
@@ -35,6 +36,11 @@ private:
     // quads
     quad m_obj_quad;
     shader m_sh_quad;
+
+    // control points of Bezier
+    controlPoints m_obj_controlPoints;
+    shader m_sh_controlPoints;
+    bool m_bShowControlPoints;
 
     // UBOs
     uniformBufferObject m_MatriciesUBO;
@@ -101,6 +107,7 @@ private:
 
     void SetPolyMode(unsigned i);
     void SetBezierPointsShape(unsigned i);
+    void SetShowBezierPoints(unsigned i);
 
 
 private: 
