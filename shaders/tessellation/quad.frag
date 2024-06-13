@@ -6,8 +6,10 @@ layout(location = 0) out vec4 FragColor;
 in FS_IN
 {
     vec3 worldPos;
-    vec3 norm;
     vec2 texCoords;
+    vec3 normal;
+    vec3 tangent;
+    vec3 bitangent;
 } i;
 // --------------------------------------------
 
@@ -35,6 +37,7 @@ uniform vec3 viewPos;
 
 uniform bool UsePhong;
 uniform bool Texturing;
+uniform bool NormalMapping;
 
 uniform sampler2D TEX_diffuse;
 uniform sampler2D TEX_normals;
@@ -57,15 +60,24 @@ vec3 PhongIllumination(vec3 worldPos, vec3 N, vec3 V, vec3 surfaceColor)
 
 void main() 
 {
-    vec3 N = normalize(i.norm);
-    vec3 V = normalize(viewPos - i.worldPos);
-
     vec4 surfaceColor = Texturing ? texture(TEX_diffuse, i.texCoords) : vec4(lgt.diffuse, 1.0f);
 
     if (!UsePhong) {
         FragColor = surfaceColor;
         return;
     }
+
+    vec3 N = normalize(i.normal);
+    vec3 T = normalize(i.tangent);
+    vec3 B = normalize(i.bitangent);
+
+    if (NormalMapping) {
+        vec4 tN = 2.0f * texture(TEX_normals, i.texCoords) - 1.0f;
+        tN.y *= -1.0f;
+        N = tN.x * T + tN.y * B + tN.z * N; 
+    }
+
+    vec3 V = normalize(viewPos - i.worldPos);
 
     vec3 color = PhongIllumination(i.worldPos, N, V, surfaceColor.xyz);
     FragColor = vec4(color, 1.0f);

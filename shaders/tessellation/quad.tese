@@ -6,8 +6,10 @@ layout(quads, equal_spacing, ccw) in;
 out FS_IN
 {
     vec3 worldPos;
-    vec3 norm;
     vec2 texCoords;
+    vec3 normal;
+    vec3 tangent;
+    vec3 bitangent;
 } o;
 // --------------------------------------------
 
@@ -65,7 +67,7 @@ vec4 BezierPatch(float u, float v)
     return pos;
 }
 
-vec3 BezierPatchNormal(float u, float v)
+vec3 BezierPatchNormal(float u, float v, out vec3 T, out vec3 B)
 {
     int offset = bezierShape * 16;
 
@@ -76,6 +78,8 @@ vec3 BezierPatchNormal(float u, float v)
         }
     }
 
+    T = normalize(t1);
+
     vec3 t2 = vec3(0.0f);
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 3; ++j) {
@@ -83,7 +87,9 @@ vec3 BezierPatchNormal(float u, float v)
         }
     }
 
-    return normalize(cross(t1, t2));
+    B = normalize(t2);
+
+    return cross(T, B);
 }
 
 void main()
@@ -96,8 +102,8 @@ void main()
     vec4 pos = BezierPatch(u, v);
     o.worldPos = (model * pos).xyz;
 
-    vec3 norm = BezierPatchNormal(u, v);
-    o.norm = mat3(transpose(inverse(model))) * norm;
+    vec3 norm = BezierPatchNormal(u, v, o.tangent, o.bitangent);
+    o.normal = mat3(transpose(inverse(model))) * norm;
     
     gl_Position = projection * view * vec4(o.worldPos, 1.0f);
 
