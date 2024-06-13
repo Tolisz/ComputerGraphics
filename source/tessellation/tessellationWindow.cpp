@@ -122,6 +122,7 @@ void tessellationWindow::RunRenderTick()
         }
     }
     else  {
+        m_sh_quad.set1i("bezierShape", m_bezierShape);
         m_sh_quad.setM4fv("model", GL_FALSE, glm::mat4(1.0f));
         m_obj_quad.Draw();
     }
