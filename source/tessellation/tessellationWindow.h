@@ -53,6 +53,7 @@ private:
     bool m_bUsePhong;
     bool m_bDisplayPatches;
     bool m_bDynamicLoD;
+    bool m_bTexturing;
 
     // UBOs
     uniformBufferObject m_MatriciesUBO;
@@ -130,6 +131,7 @@ private:
     void SetPhongShading(unsigned i);
     void SetDisplayPatches(unsigned i);
     void SetDynamicLoD(unsigned i);
+    void SetTexturing(unsigned i);
 
     void PreparePatchesModelMatrices();
 

@@ -23,7 +23,7 @@ uniform int bezierShape;
 float factor(float z) 
 {
     const float log_10 = log(10.0f);
-    return clamp(-16.0f * (log(-z * 0.01f) / log_10), 1.0f, 16.0f); 
+    return clamp(-16.0f * (log(-z * 0.01f) / log_10), 1.0f, 100.0f); 
 }
 
 void main()

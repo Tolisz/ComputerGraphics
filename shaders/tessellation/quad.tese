@@ -7,6 +7,7 @@ out FS_IN
 {
     vec3 worldPos;
     vec3 norm;
+    vec2 texCoords;
 } o;
 // --------------------------------------------
 
@@ -23,6 +24,9 @@ layout(std140, binding = 1) uniform ControlPoints
     vec4 p[CONTROL_POINTS_SETS * 16];
 };
 uniform int bezierShape;
+
+uniform int PatchIndex;
+uniform int NumOfPatches;  // Number of patches if one row/column
 
 float B3( int i, float t)
 {
@@ -96,4 +100,12 @@ void main()
     o.norm = mat3(transpose(inverse(model))) * norm;
     
     gl_Position = projection * view * vec4(o.worldPos, 1.0f);
+
+    // Set texture coordinates
+    // uniform int PatchIndex;
+    // uniform int NumOfPatches; 
+
+    float OneN = 1.0f / NumOfPatches;
+    o.texCoords.x = (PatchIndex / NumOfPatches) / float(NumOfPatches) + u * OneN;
+    o.texCoords.y = (PatchIndex % NumOfPatches) / float(NumOfPatches) + v * OneN;
 }

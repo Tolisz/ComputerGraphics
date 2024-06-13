@@ -7,6 +7,7 @@ in FS_IN
 {
     vec3 worldPos;
     vec3 norm;
+    vec2 texCoords;
 } i;
 // --------------------------------------------
 
@@ -33,6 +34,10 @@ uniform Light lgt;
 uniform vec3 viewPos; 
 uniform bool UsePhong;
 
+uniform sampler2D TEX_diffuse;
+uniform sampler2D TEX_normals;
+uniform sampler2D TEX_height; 
+
 vec3 PhongIllumination(vec3 worldPos, vec3 N, vec3 V)
 {
     vec3 color = mat.ka * lgt.ambient;
@@ -58,6 +63,7 @@ void main()
     vec3 N = normalize(i.norm);
     vec3 V = normalize(viewPos - i.worldPos);
 
-    vec3 color = PhongIllumination(i.worldPos, N, V);
-    FragColor = vec4(color, 1.0f);
+    // vec3 color = PhongIllumination(i.worldPos, N, V);
+    // FragColor = vec4(color, 1.0f);
+    FragColor = vec4(i.texCoords, 0.0f, 1.0f);
 }
