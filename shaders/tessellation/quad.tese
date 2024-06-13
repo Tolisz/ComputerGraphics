@@ -30,6 +30,10 @@ uniform int bezierShape;
 uniform int PatchIndex;
 uniform int NumOfPatches;  // Number of patches if one row/column
 
+uniform sampler2D TEX_height;
+uniform bool DisplacementMapping;
+uniform bool DynamicLoD;
+
 float B3( int i, float t)
 {
     const vec4 bc = vec4( 1.0f, 3.0f, 3.0f, 1.0f );
@@ -92,6 +96,12 @@ vec3 BezierPatchNormal(float u, float v, out vec3 T, out vec3 B)
     return cross(T, B);
 }
 
+float factor(float z) 
+{
+    const float log_10 = log(10.0f);
+    return clamp(-16.0f * (log(-z * 0.01f) / log_10), 1.0f, 100.0f); 
+}
+
 void main()
 {
     float u = gl_TessCoord.x;
@@ -99,19 +109,23 @@ void main()
     float v = gl_TessCoord.y;
     float omv = 1 - v;
 
-    vec4 pos = BezierPatch(u, v);
-    o.worldPos = (model * pos).xyz;
-
-    vec3 norm = BezierPatchNormal(u, v, o.tangent, o.bitangent);
-    o.normal = mat3(transpose(inverse(model))) * norm;
-    
-    gl_Position = projection * view * vec4(o.worldPos, 1.0f);
-
     // Set texture coordinates
-    // uniform int PatchIndex;
-    // uniform int NumOfPatches; 
-
     float OneN = 1.0f / NumOfPatches;
     o.texCoords.x = (PatchIndex / NumOfPatches) / float(NumOfPatches) + u * OneN;
     o.texCoords.y = (PatchIndex % NumOfPatches) / float(NumOfPatches) + v * OneN;
+
+    vec4 pos = BezierPatch(u, v);
+    vec3 norm = BezierPatchNormal(u, v, o.tangent, o.bitangent);
+
+    o.worldPos = (model * pos).xyz;
+    o.normal = mat3(transpose(inverse(model))) * norm;
+
+    if (DisplacementMapping) {  
+        float z = (view * vec4(o.worldPos, 1.0f)).z;
+        float LoD = !DynamicLoD ? 0.0f : 6.0f - (log(factor(z)) / log(2.0f));  
+        float h = 0.05f * textureLod(TEX_height, o.texCoords, 0.0f).x;
+        o.worldPos += h * o.normal;
+    }
+    
+    gl_Position = projection * view * vec4(o.worldPos, 1.0f);
 }

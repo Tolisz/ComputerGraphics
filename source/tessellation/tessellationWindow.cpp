@@ -129,6 +129,7 @@ void tessellationWindow::RunRenderTick()
     m_sh_quad.set1b("DynamicLoD", m_bDynamicLoD);
     m_sh_quad.set1b("Texturing", m_bTexturing);
     m_sh_quad.set1b("NormalMapping", m_bNormalMappping);
+    m_sh_quad.set1b("DisplacementMapping", m_bDisplacementMapping);
 
     glPatchParameteri(GL_PATCH_VERTICES, 4);
     
@@ -578,7 +579,7 @@ void tessellationWindow::InitKeyboardMenager()
     .AddState("On", std::bind(&tessellationWindow::SetTexturing, this, std::placeholders::_1));
     SetTexturing(0);
 
-    m_keyboardMenager.RegisterKey(GLFW_KEY_R, "Bump mapping")
+    m_keyboardMenager.RegisterKey(GLFW_KEY_R, "Normal mapping")
     .AddState("Off", std::bind(&tessellationWindow::SetNormalMapping, this, std::placeholders::_1))
     .AddState("On", std::bind(&tessellationWindow::SetNormalMapping, this, std::placeholders::_1));
     SetNormalMapping(0);

@@ -40,8 +40,7 @@ uniform bool Texturing;
 uniform bool NormalMapping;
 
 uniform sampler2D TEX_diffuse;
-uniform sampler2D TEX_normals;
-uniform sampler2D TEX_height; 
+uniform sampler2D TEX_normals; 
 
 vec3 PhongIllumination(vec3 worldPos, vec3 N, vec3 V, vec3 surfaceColor)
 {
