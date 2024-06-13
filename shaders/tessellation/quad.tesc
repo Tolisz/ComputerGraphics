@@ -30,7 +30,6 @@ void main()
 {
     gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
 
-
     if (!DynamicLoD) {
         gl_TessLevelOuter[0] = outerLevel.x;
         gl_TessLevelOuter[1] = outerLevel.y;
@@ -41,10 +40,11 @@ void main()
         gl_TessLevelInner[1] = innerLevel.y;
     }
     else {
-        vec4 c0 = view * model * ((p[0]  + p[3] ) / 2.0f);
-        vec4 c1 = view * model * ((p[0]  + p[12]) / 2.0f);
-        vec4 c2 = view * model * ((p[15] + p[12]) / 2.0f);
-        vec4 c3 = view * model * ((p[3]  + p[15]) / 2.0f);
+        mat4 VM = view * model;
+        vec4 c0 = VM * ((p[0]  + p[3] ) / 2.0f);
+        vec4 c1 = VM * ((p[0]  + p[12]) / 2.0f);
+        vec4 c2 = VM * ((p[15] + p[12]) / 2.0f);
+        vec4 c3 = VM * ((p[3]  + p[15]) / 2.0f);
         vec4 c = (c0 + c1 + c2 + c3) / 4.0f;
 
         gl_TessLevelOuter[0] = factor(c0.z);
