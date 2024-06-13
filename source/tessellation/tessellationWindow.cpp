@@ -4,6 +4,11 @@
 #include <imgui_impl_opengl3.h>
 #include <glm/trigonometric.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include <gli/load_dds.hpp>
+#undef GLM_ENABLE_EXPERIMENTAL
+
 #include <iostream>
 
 std::string tessellationWindow::m_shaderBasePath = "shaders/tessellation/";
@@ -54,6 +59,11 @@ void tessellationWindow::RunInit()
 
     InitKeyboardMenager();
     PreparePatchesModelMatrices();
+
+    // textures
+    m_tex_diffuse = LoadDDSTextureFromFile("resources/textures/tess/diffuse.dds");
+    m_tex_height = LoadDDSTextureFromFile("resources/textures/tess/height.dds");
+    m_tex_normals = LoadDDSTextureFromFile("resources/textures/tess/normals.dds");
 
     // GUI
     // *=*=*=*=*=*=*=*=*=*=
@@ -598,6 +608,20 @@ void tessellationWindow::SetDisplayPatches(unsigned i)
 void tessellationWindow::SetDynamicLoD(unsigned i)
 {
     m_bDynamicLoD = static_cast<bool>(i); 
+}
+
+GLuint tessellationWindow::LoadDDSTextureFromFile(const std::string& path)
+{
+    gli::texture tex = gli::load_dds(path);
+    if (tex.empty()) {
+        std::cerr << "An error occured during loading DDS texutre" 
+        << "\n\t[path]: " << path 
+        << std::endl;  
+
+        return 0;
+    }
+    
+    return 0;
 }
 
 void tessellationWindow::PreparePatchesModelMatrices()

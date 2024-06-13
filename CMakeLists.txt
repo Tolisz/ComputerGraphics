@@ -11,6 +11,7 @@ add_subdirectory(externals/glfw)
 add_subdirectory(externals/glad)
 add_subdirectory(externals/imgui)
 add_subdirectory(externals/stb)
+add_subdirectory(externals/gli)
 
 # common elements library
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=

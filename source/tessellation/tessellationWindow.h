@@ -66,6 +66,11 @@ private:
     float m_tessUniformValue;
     int m_bezierShape;
 
+    // textures
+    GLuint m_tex_diffuse;
+    GLuint m_tex_height;
+    GLuint m_tex_normals;
+
     // *=*=*=*=*=*=*=*=*=*=
     //         GUI
     // *=*=*=*=*=*=*=*=*=*=
@@ -127,6 +132,8 @@ private:
     void SetDynamicLoD(unsigned i);
 
     void PreparePatchesModelMatrices();
+
+    GLuint LoadDDSTextureFromFile(const std::string& path);
 
 private: 
 

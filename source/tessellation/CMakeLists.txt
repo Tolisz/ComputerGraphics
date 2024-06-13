@@ -1,4 +1,5 @@
-set(TESSELATION_LINK_LIBS   PUBLIC common)
+set(TESSELATION_LINK_LIBS   PUBLIC common
+                            PUBLIC gli)
 
 set(TESSELATION_EXECUTABLE_NAME tesselation)
 file(GLOB TESSELATION_SOURCE_FILES *.cpp)
