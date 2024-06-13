@@ -52,6 +52,7 @@ private:
     bool m_bShowControlPoints;
     bool m_bUsePhong;
     bool m_bDisplayPatches;
+    bool m_bDynamicLoD;
 
     // UBOs
     uniformBufferObject m_MatriciesUBO;
@@ -62,6 +63,7 @@ private:
     // Tessellation params
     glm::vec4 m_tessLevelOuter;
     glm::vec2 m_tessLevelInner;
+    float m_tessUniformValue;
     int m_bezierShape;
 
     // *=*=*=*=*=*=*=*=*=*=
@@ -122,6 +124,7 @@ private:
     void SetShowBezierPoints(unsigned i);
     void SetPhongShading(unsigned i);
     void SetDisplayPatches(unsigned i);
+    void SetDynamicLoD(unsigned i);
 
     void PreparePatchesModelMatrices();
 

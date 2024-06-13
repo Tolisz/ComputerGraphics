@@ -19,7 +19,7 @@ void tessellationWindow::RunInit()
     // GLFW
     // *=*=*=*=*=*=*=*=*=*=
     SetUpWindowsCallbacks();
-
+    m_camera.m_farPlane = 100.0f;
     // Scene
     // *=*=*=*=*=*=*=*=*=*=
     m_windowState = wState::DEFALUT;
@@ -80,6 +80,7 @@ void tessellationWindow::RunInit()
     // Tessellation params
     m_tessLevelOuter = glm::vec4(10.0f, 10.0f, 10.0f, 10.0f);
     m_tessLevelInner = glm::vec2(10.0f, 10.0f);
+    m_tessUniformValue = 10.0f;
 
     glClearColor(0.5f, 0.5f, 1.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
@@ -96,13 +97,13 @@ void tessellationWindow::RunRenderTick()
     m_MatriciesUBO.SetBufferData(0, matrices, 2 * sizeof(glm::mat4));
 
     // Draw 
-
     m_sh_quad.Use();
     m_sh_quad.set4fv("outerLevel", m_tessLevelOuter);
     m_sh_quad.set2fv("innerLevel", m_tessLevelInner);
-    //m_sh_quad.set1i("bezierShape", m_bezierShape);
     m_sh_quad.set3fv("viewPos", m_camera.m_worldPos);
     m_sh_quad.set1b("UsePhong", m_bUsePhong);
+    m_sh_quad.set1b("DynamicLoD", m_bDynamicLoD);
+
     glPatchParameteri(GL_PATCH_VERTICES, 4);
     
     if (m_bDisplayPatches) {
@@ -172,6 +173,7 @@ void tessellationWindow::PopulateBezierPointsUBO()
             });
         }
     }
+
     // down 
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
@@ -314,6 +316,7 @@ void tessellationWindow::GenGUI_Tessellation()
     {   
         ImGui::SeparatorText("Parameters");
 
+        ImGui::BeginDisabled(m_bDynamicLoD);
         glm::vec4 prevTessOuter = m_tessLevelOuter;
         if (ImGui::DragFloat4("outer", reinterpret_cast<float*>(&m_tessLevelOuter), 0.1f, 1.0f, 100.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp))
         {   
@@ -334,6 +337,12 @@ void tessellationWindow::GenGUI_Tessellation()
             }
         }
         ImGui::DragFloat2("inner", reinterpret_cast<float*>(&m_tessLevelInner), 0.1f, 1.0f, 100.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp); 
+        if (ImGui::DragFloat("uniform value", &m_tessUniformValue, 0.1f, 1.0f, 100.0f, "%.1f", ImGuiSliderFlags_AlwaysClamp)) 
+        {
+            m_tessLevelOuter = glm::vec4(m_tessUniformValue);
+            m_tessLevelInner = glm::vec2(m_tessUniformValue);
+        }
+        ImGui::EndDisabled();
 
         ImGui::SeparatorText("Keyboard");
         if (ImGui::BeginTable("Tessellation settings", 3, 
@@ -526,6 +535,11 @@ void tessellationWindow::InitKeyboardMenager()
     .AddState("Off", std::bind(&tessellationWindow::SetDisplayPatches, this, std::placeholders::_1))
     .AddState("On", std::bind(&tessellationWindow::SetDisplayPatches, this, std::placeholders::_1));
     SetDisplayPatches(0);
+
+    m_keyboardMenager.RegisterKey(GLFW_KEY_E, "Dynamic level of details")
+    .AddState("Off", std::bind(&tessellationWindow::SetDynamicLoD, this, std::placeholders::_1))
+    .AddState("On", std::bind(&tessellationWindow::SetDynamicLoD, this, std::placeholders::_1));
+    SetDynamicLoD(0);
 }
 
 void tessellationWindow::SetPolyMode(unsigned i)
@@ -578,6 +592,11 @@ void tessellationWindow::SetDisplayPatches(unsigned i)
             m_tessLevelOuter.w = m_tessLevelOuter.y;
         }
     }
+}
+
+void tessellationWindow::SetDynamicLoD(unsigned i)
+{
+    m_bDynamicLoD = static_cast<bool>(i); 
 }
 
 void tessellationWindow::PreparePatchesModelMatrices()
