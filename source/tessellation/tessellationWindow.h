@@ -41,6 +41,8 @@ private:
     shader m_sh_quad;
 
     glm::mat4 m_modelMatrices[NUM_SIDE_PATCHES * NUM_SIDE_PATCHES];
+    int m_wavesPatches[NUM_SIDE_PATCHES * NUM_SIDE_PATCHES];
+    int m_convexPatches[NUM_SIDE_PATCHES * NUM_SIDE_PATCHES];
 
     // control points of Bezier
     controlPoints m_obj_controlPoints;

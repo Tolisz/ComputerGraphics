@@ -100,7 +100,7 @@ void tessellationWindow::RunRenderTick()
     m_sh_quad.Use();
     m_sh_quad.set4fv("outerLevel", m_tessLevelOuter);
     m_sh_quad.set2fv("innerLevel", m_tessLevelInner);
-    m_sh_quad.set1i("bezierShape", m_bezierShape);
+    //m_sh_quad.set1i("bezierShape", m_bezierShape);
     m_sh_quad.set3fv("viewPos", m_camera.m_worldPos);
     m_sh_quad.set1b("UsePhong", m_bUsePhong);
     glPatchParameteri(GL_PATCH_VERTICES, 4);
@@ -108,6 +108,15 @@ void tessellationWindow::RunRenderTick()
     if (m_bDisplayPatches) {
         for (int i = 0; i < NUM_SIDE_PATCHES * NUM_SIDE_PATCHES; ++i) {
             m_sh_quad.setM4fv("model", GL_FALSE, m_modelMatrices[i]);
+            
+            if (m_bezierShape == 0) {
+                m_sh_quad.set1i("bezierShape", m_bezierShape);
+            } else if (m_bezierShape == 1) {
+                m_sh_quad.set1i("bezierShape", m_convexPatches[i]);
+            } else if (m_bezierShape == 3) {
+                m_sh_quad.set1i("bezierShape", m_wavesPatches[i]);
+            }
+
             m_obj_quad.Draw();
         }
     }
@@ -590,7 +599,14 @@ void tessellationWindow::PreparePatchesModelMatrices()
             translation = glm::translate(glm::mat4(1.0f), 
                 glm::vec3(start.x + sideSize * i, 0.0f, start.z - sideSize * j));
             
-            m_modelMatrices[4*i +j] = translation * scale;
+            m_modelMatrices[NUM_SIDE_PATCHES * i + j] = translation * scale;
+        }
+    }
+
+    for (int i = 0; i < NUM_SIDE_PATCHES; i++) {
+        for (int j = 0; j < NUM_SIDE_PATCHES; j++) {
+            m_wavesPatches[NUM_SIDE_PATCHES * i + j] = i % 2 ? 4 : 3;
+            m_convexPatches[NUM_SIDE_PATCHES * i + j] = (i + j) % 2 ? 2 : 1;
         }
     }
 }
