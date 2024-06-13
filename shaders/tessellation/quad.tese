@@ -83,7 +83,7 @@ vec3 BezierPatchNormal(float u, float v)
         }
     }
 
-    return normalize(cross(t2, t1));
+    return normalize(cross(t1, t2));
 }
 
 void main()

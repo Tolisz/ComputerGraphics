@@ -51,6 +51,9 @@ void tessellationWindow::RunInit()
     m_sh_quad.set3fv("lgt.position", glm::vec3(0.0f, 5.0f, 0.0f));
 
     m_sh_quad.set1i("NumOfPatches", NUM_SIDE_PATCHES);
+    m_sh_quad.set1i("TEX_diffuse", 0);
+    m_sh_quad.set1i("TEX_normals", 1);
+    m_sh_quad.set1i("TEX_height", 2);
 
     m_obj_controlPoints.InitGL();
 
@@ -118,13 +121,13 @@ void tessellationWindow::RunRenderTick()
     /* 
         DRAW PATCHES 
     */
-
     m_sh_quad.Use();
     m_sh_quad.set4fv("outerLevel", m_tessLevelOuter);
     m_sh_quad.set2fv("innerLevel", m_tessLevelInner);
     m_sh_quad.set3fv("viewPos", m_camera.m_worldPos);
     m_sh_quad.set1b("UsePhong", m_bUsePhong);
     m_sh_quad.set1b("DynamicLoD", m_bDynamicLoD);
+    m_sh_quad.set1b("Texturing", m_bTexturing);
 
     glPatchParameteri(GL_PATCH_VERTICES, 4);
     
@@ -573,6 +576,16 @@ void tessellationWindow::InitKeyboardMenager()
     .AddState("Off", std::bind(&tessellationWindow::SetTexturing, this, std::placeholders::_1))
     .AddState("On", std::bind(&tessellationWindow::SetTexturing, this, std::placeholders::_1));
     SetTexturing(0);
+
+    m_keyboardMenager.RegisterKey(GLFW_KEY_R, "Bump mapping")
+    .AddState("Off", std::bind(&tessellationWindow::SetBumpMapping, this, std::placeholders::_1))
+    .AddState("On", std::bind(&tessellationWindow::SetBumpMapping, this, std::placeholders::_1));
+    SetBumpMapping(0);
+
+    m_keyboardMenager.RegisterKey(GLFW_KEY_D, "Displacement mapping")
+    .AddState("Off", std::bind(&tessellationWindow::SetDisplacementMapping, this, std::placeholders::_1))
+    .AddState("On", std::bind(&tessellationWindow::SetDisplacementMapping, this, std::placeholders::_1));
+    SetDisplacementMapping(0);
 }
 
 void tessellationWindow::SetPolyMode(unsigned i)
@@ -635,6 +648,16 @@ void tessellationWindow::SetDynamicLoD(unsigned i)
 void tessellationWindow::SetTexturing(unsigned i)
 {
     m_bTexturing = static_cast<bool>(i);
+}
+
+void tessellationWindow::SetBumpMapping(unsigned i)
+{
+    m_bBumpMappping = static_cast<bool>(i);
+}
+
+void tessellationWindow::SetDisplacementMapping(unsigned i)
+{
+    m_bDisplacementMapping = static_cast<bool>(i);
 }
 
 // From GLI manual

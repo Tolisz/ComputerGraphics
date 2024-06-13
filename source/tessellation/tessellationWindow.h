@@ -54,6 +54,8 @@ private:
     bool m_bDisplayPatches;
     bool m_bDynamicLoD;
     bool m_bTexturing;
+    bool m_bBumpMappping;
+    bool m_bDisplacementMapping;
 
     // UBOs
     uniformBufferObject m_MatriciesUBO;
@@ -132,6 +134,8 @@ private:
     void SetDisplayPatches(unsigned i);
     void SetDynamicLoD(unsigned i);
     void SetTexturing(unsigned i);
+    void SetBumpMapping(unsigned i);
+    void SetDisplacementMapping(unsigned i);
 
     void PreparePatchesModelMatrices();
 
