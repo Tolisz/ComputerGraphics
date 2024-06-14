@@ -23,7 +23,7 @@ waterGrid::waterGrid(int N, float a, float c)
 waterGrid::~waterGrid()
 {}
 
-void waterGrid::InitGL()
+void waterGrid::InitGL(const std::string& shaderPath)
 {
     glGenVertexArrays(1, &m_gl_VAO);
     glGenBuffers(1, &m_gl_PreviousPosBuffer);
@@ -32,7 +32,7 @@ void waterGrid::InitGL()
     glGenBuffers(1, &m_gl_DampingBuffer);
 
     PopulateBuffers();
-    PrepareShaders();
+    PrepareShaders(shaderPath);
     PrepareTextures();
 }
 
@@ -161,10 +161,10 @@ void waterGrid::PopulateBuffers()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void waterGrid::PrepareShaders()
+void waterGrid::PrepareShaders(const std::string& shaderPath)
 {
     m_sh_waterSimulation.Init();
-    m_sh_waterSimulation.AttachShader("shaders/waterSimulation.comp", GL_COMPUTE_SHADER);
+    m_sh_waterSimulation.AttachShader(shaderPath + "waterSimulation.comp", GL_COMPUTE_SHADER);
     m_sh_waterSimulation.Link();
 
     m_sh_waterSimulation.Use();
@@ -174,7 +174,7 @@ void waterGrid::PrepareShaders()
     m_sh_waterSimulation.set1f("h", m_h);
 
     m_sh_computeNormals.Init();
-    m_sh_computeNormals.AttachShader("shaders/waterNormals.comp", GL_COMPUTE_SHADER);
+    m_sh_computeNormals.AttachShader(shaderPath + "waterNormals.comp", GL_COMPUTE_SHADER);
     m_sh_computeNormals.Link();
 
     m_sh_computeNormals.Use();

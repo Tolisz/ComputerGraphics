@@ -65,7 +65,7 @@ public:
     //      Methods
     // *=*=*=*=*=*=*=*=*=*=
 
-    void InitGL();
+    void InitGL(const std::string& shaderPath);
     void DeInitGL();
     
     void SimulateWater(float dt);
@@ -78,7 +78,7 @@ public:
 private:
 
     void PopulateBuffers();
-    void PrepareShaders();
+    void PrepareShaders(const std::string& shaderPath);
     void PrepareTextures();
 };
 

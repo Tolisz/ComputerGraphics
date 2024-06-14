@@ -123,7 +123,7 @@ void main()
     if (DisplacementMapping) {  
         float z = (view * vec4(o.worldPos, 1.0f)).z;
         float LoD = !DynamicLoD ? 0.0f : 6.0f - (log(factor(z)) / log(2.0f));  
-        float h = 0.05f * textureLod(TEX_height, o.texCoords, 0.0f).x;
+        float h = 0.05f * textureLod(TEX_height, o.texCoords, LoD).x;
         o.worldPos += h * o.normal;
     }
     

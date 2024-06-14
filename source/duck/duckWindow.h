@@ -22,6 +22,8 @@ class duckWindow: public glfwWindowWrap
 {
 private:
 
+    static std::string m_shaderBasePath;
+
     // Window
     enum class wState
     {
@@ -178,4 +180,6 @@ private:
 
     void SetState(wState newState);
     wState GetState();
+
+    static std::string shPath(std::string fileName);
 };

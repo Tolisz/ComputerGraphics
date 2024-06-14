@@ -10,6 +10,8 @@
 #include <iostream>
 #include <cmath>
 
+std::string duckWindow::m_shaderBasePath = "shaders/duck/";
+
 duckWindow::duckWindow()
     : m_gen(m_rd()), 
       m_uniformZeroToOne(0.0f, 1.0f),
@@ -68,8 +70,8 @@ void duckWindow::RunInit()
     m_obj_lights.push_back(l);
 
     m_sh_light.Init();
-    m_sh_light.AttachShader("shaders/lightBillboard.vert", GL_VERTEX_SHADER);
-    m_sh_light.AttachShader("shaders/lightBillboard.frag", GL_FRAGMENT_SHADER);
+    m_sh_light.AttachShader(shPath("lightBillboard.vert"), GL_VERTEX_SHADER);
+    m_sh_light.AttachShader(shPath("lightBillboard.frag"), GL_FRAGMENT_SHADER);
     m_sh_light.Link();
 
     // Materials
@@ -87,12 +89,12 @@ void duckWindow::RunInit()
     m_materials.insert(std::make_pair("duck", m));
 
     // Water
-    m_obj_water.InitGL();
+    m_obj_water.InitGL(m_shaderBasePath);
     m_waterColor = glm::vec3(0.0288, 0.960, 0.882);
 
     m_sh_water.Init();
-    m_sh_water.AttachShader("shaders/water.vert", GL_VERTEX_SHADER);
-    m_sh_water.AttachShader("shaders/water.frag", GL_FRAGMENT_SHADER);
+    m_sh_water.AttachShader(shPath("water.vert"), GL_VERTEX_SHADER);
+    m_sh_water.AttachShader(shPath("water.frag"), GL_FRAGMENT_SHADER);
     m_sh_water.Link();
 
     m_sh_water.Use();
@@ -103,8 +105,8 @@ void duckWindow::RunInit()
     m_obj_skyBox.InitGL();
     
     m_sh_skyBox.Init();
-    m_sh_skyBox.AttachShader("shaders/skyBox.vert", GL_VERTEX_SHADER);
-    m_sh_skyBox.AttachShader("shaders/skyBox.frag", GL_FRAGMENT_SHADER);
+    m_sh_skyBox.AttachShader(shPath("skyBox.vert"), GL_VERTEX_SHADER);
+    m_sh_skyBox.AttachShader(shPath("skyBox.frag"), GL_FRAGMENT_SHADER);
     m_sh_skyBox.Link();
 
     // std::vector<std::string> defaultSkyBox = {
@@ -131,8 +133,8 @@ void duckWindow::RunInit()
     m_obj_duck.InitGLFromFile("resources/meshes/duck/duck.txt");
     
     m_sh_duck.Init();
-    m_sh_duck.AttachShader("shaders/duck.vert", GL_VERTEX_SHADER);
-    m_sh_duck.AttachShader("shaders/duck.frag", GL_FRAGMENT_SHADER);
+    m_sh_duck.AttachShader(shPath("duck.vert"), GL_VERTEX_SHADER);
+    m_sh_duck.AttachShader(shPath("duck.frag"), GL_FRAGMENT_SHADER);
     m_sh_duck.Link();
 
     m_sh_duck.Use();
@@ -146,9 +148,9 @@ void duckWindow::RunInit()
     m_obj_debugBezier.UpdatePoints(points);
 
     m_sh_debugBezier.Init();
-    m_sh_debugBezier.AttachShader("shaders/bezierCurve.vert", GL_VERTEX_SHADER);
-    m_sh_debugBezier.AttachShader("shaders/bezierCurve.geom", GL_GEOMETRY_SHADER);
-    m_sh_debugBezier.AttachShader("shaders/bezierCurve.frag", GL_FRAGMENT_SHADER);
+    m_sh_debugBezier.AttachShader(shPath("bezierCurve.vert"), GL_VERTEX_SHADER);
+    m_sh_debugBezier.AttachShader(shPath("bezierCurve.geom"), GL_GEOMETRY_SHADER);
+    m_sh_debugBezier.AttachShader(shPath("bezierCurve.frag"), GL_FRAGMENT_SHADER);
     m_sh_debugBezier.Link();
 
     // OpenGL initial configuration
@@ -762,4 +764,9 @@ void duckWindow::SetState(wState newState)
 duckWindow::wState duckWindow::GetState()
 {
     return m_windowState;
+}
+
+std::string duckWindow::shPath(std::string fileName)
+{
+    return m_shaderBasePath + fileName;
 }
