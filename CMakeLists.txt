@@ -17,10 +17,12 @@ add_subdirectory(externals/gli)
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 add_subdirectory(source/common)
 
-# executable
+# executables
 # *=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=
 
 # duck project
 add_subdirectory(source/duck)
 # tessellation project
 add_subdirectory(source/tessellation)
+# puma project
+add_subdirectory(source/puma)
